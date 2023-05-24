@@ -1,0 +1,61 @@
+<UserControl x:Class="SimpleSerialLoggerGui.UI.TrayIcon.TrayIconMain"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:tb="http://www.hardcodet.net/taskbar"
+             xmlns:trayIcon="clr-namespace:SimpleSerialLoggerGui.UI.TrayIcon"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=trayIcon:TrayIconViewModel, IsDesignTimeCreatable=True}"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Background="#222222" >
+    
+            <!-- ReSharper disable Xaml.StaticResourceNotResolved because mainTrayIcon comes from MainWindow just before InitializeComponent() -->
+            <tb:TaskbarIcon 
+                x:Name="ApplicationMainTrayIcon"
+                Icon="{StaticResource MainTrayIcon}" 
+                Visibility="Visible"
+                d:DataContext="{d:DesignInstance Type=trayIcon:TrayIconViewModel, IsDesignTimeCreatable=True}">
+                <!-- ReSharper restore Xaml.StaticResourceNotResolved -->
+                
+                <!-- Custom tooltip because we need custom colors -->
+                <tb:TaskbarIcon.TrayToolTip>
+                    <Border
+                        Background="Black"
+                        BorderBrush="#EEEEEE"
+                        BorderThickness="2"
+                        CornerRadius="4"
+                        Opacity="0.95"
+                        Width="260"
+                        Height="40">
+                
+                        <TextBlock
+                            Text="SimpleSerialLoggerGui"
+                            Foreground="#EEEEEE"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+                
+                    </Border>
+                </tb:TaskbarIcon.TrayToolTip>
+                
+                <tb:TaskbarIcon.ContextMenu>
+                    <ContextMenu Background="#222222" >
+                        
+                        <MenuItem Header="Open SimpleSerialLoggerGui Main Window" Command="{Binding OpenMainWindowCommand}" />
+                        
+                        <Separator />
+                        
+                        <MenuItem Header="Open Log" Command="{Binding OpenLogfileInVscodeCommand}" />
+                        
+                        <MenuItem Header="Open Settings" Command="{Binding OpenSettingsWindowCommand}" />
+                        
+                        <Separator />
+                        
+                        <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
+                        
+                    </ContextMenu>
+                </tb:TaskbarIcon.ContextMenu>
+                
+            </tb:TaskbarIcon>
+    
+</UserControl>
