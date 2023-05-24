@@ -7,6 +7,7 @@ using Autofac;
 using Config.Net;
 using JetBrains.Annotations;
 using Serilog;
+using Serilog.Core;
 using SimpleSerialLoggerGui.Core;
 using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.Application;
@@ -27,6 +28,7 @@ public class DiContainerBuilder
     private readonly ContainerBuilder _builder = new ();
     private ILogger? _logger;
     private ISettingsApplicationLocal? _settingsApplicationLocal;
+    private ILogger? _serialLogger;
 
     //private ISettingsApplicationLocal _settingsApplicationLocal;
 
@@ -96,27 +98,6 @@ public class DiContainerBuilder
                 .Build();
         
         _builder.RegisterInstance(_settingsApplicationLocal).As<ISettingsApplicationLocal>().SingleInstance();
-        
-        SetupAnyBlankConfigurationPropertiesAsDefaults();
-    }
-
-    private void SetupAnyBlankConfigurationPropertiesAsDefaults()
-    {
-        if (_settingsApplicationLocal is null) throw new NullReferenceException($"{nameof(_settingsApplicationLocal)} was null");
-        
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastComPort)) _settingsApplicationLocal.SerialSelectionSettings.LastComPort = "COM1";
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastBaud)) _settingsApplicationLocal.SerialSelectionSettings.LastBaud = "115200";
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastParity)) _settingsApplicationLocal.SerialSelectionSettings.LastParity = "1";
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastDataBit)) _settingsApplicationLocal.SerialSelectionSettings.LastDataBit = "8";
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastStopBit)) _settingsApplicationLocal.SerialSelectionSettings.LastStopBit = "1";
-
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialLogSettings.LastDirectory)) _settingsApplicationLocal.SerialLogSettings.LastDirectory = 
-            Path.Join(
-                ApplicationPaths.LogAppBasePath,
-                "..",
-                "Serial Data Logs");
-
-        Directory.CreateDirectory(_settingsApplicationLocal.SerialLogSettings.LastDirectory);
     }
 
     [SupportedOSPlatform("Windows7.0")]

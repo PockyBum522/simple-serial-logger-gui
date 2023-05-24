@@ -30,7 +30,7 @@
                         Height="40">
                 
                         <TextBlock
-                            Text="SimpleSerialLoggerGui"
+                            Text="Simple Serial Logger"
                             Foreground="#EEEEEE"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center" />
@@ -41,13 +41,11 @@
                 <tb:TaskbarIcon.ContextMenu>
                     <ContextMenu Background="#222222" >
                         
-                        <MenuItem Header="Open SimpleSerialLoggerGui Main Window" Command="{Binding OpenMainWindowCommand}" />
+                        <MenuItem Header="Open Simple Serial Logger Main Window" Command="{Binding OpenMainWindowCommand}" />
                         
                         <Separator />
                         
-                        <MenuItem Header="Open Log" Command="{Binding OpenLogfileInVscodeCommand}" />
-                        
-                        <MenuItem Header="Open Settings" Command="{Binding OpenSettingsWindowCommand}" />
+                        <MenuItem Header="Open Application Log" Command="{Binding OpenLogfileInVscodeCommand}" />
                         
                         <Separator />
                         

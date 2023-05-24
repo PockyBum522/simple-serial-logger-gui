@@ -34,19 +34,6 @@ public partial class App
             
         exceptionHandler.SetupExceptionHandlingEvents();
 
-// TO DELETE THE EXCEPTION THROW ONCE YOU HAVE SET THE FOLLOWING - START DELETING AT THIS LINE 
-        const string throwMessage =
-            @"Please go into App.xaml.cs and:
-
-            1. Choose if you would like your application to run as a Notification Tray Icon Application or a normal windowed application.
-
-            2. Set the application name.
-
-            3. Remove this exception throw once you have done the above.";
-        
-        throw new NotImplementedException(throwMessage);
-// TO DELETE THE EXCEPTION THROW ONCE YOU HAVE SET THE FOLLOWING - FINISH DELETING AT THIS LINE
-
 // ReSharper disable once HeuristicUnreachableCode
 #pragma warning disable CS0162 
         
@@ -55,7 +42,7 @@ public partial class App
         
         ApplicationInformation.RunAsTrayIconApplication = true;
         
-        ApplicationInformation.ApplicationFriendlyName = "SimpleSerialLoggerGui"; 
+        ApplicationInformation.ApplicationFriendlyName = "Simple Serial Logger Gui"; 
         
         // AND THEN DELETE THE THROW LINE ABOVE...
         

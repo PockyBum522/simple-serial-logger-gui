@@ -17,6 +17,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10" />
             <RowDefinition Height="1*" />
+            <RowDefinition Height="98" />
+            <RowDefinition Height="55" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -57,11 +59,132 @@
             
         </Grid.Resources>
 
-        <DockPanel Grid.Row="1" Grid.Column="1" Margin="5">
-            <Border BorderBrush="Gray" BorderThickness="1" Padding="2">
-                <TextBlock Text="Hello world!" />
-            </Border>
+        <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,5">
+            
+            <DockPanel DockPanel.Dock="Right" LastChildFill="False" Margin="10,0,0,0">
+                <Button Content="Clear Log Box (Not File)" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
+                <Button Content="Add mark to box" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
+                <Button Content="Add mark to box and file" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
+            </DockPanel>
+            
+            <DockPanel DockPanel.Dock="Left" LastChildFill="True">
+                <TextBlock Text="Serial log:" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding CurrentSerialLog}" AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </DockPanel>
         </DockPanel>
+        
+        <DockPanel Grid.Row="2" Grid.Column="1" Dock="Left">
+            
+            <DockPanel Dock="Top" Margin="0,5">
+                
+                <TextBlock Text="Directory to save logs to:" DockPanel.Dock="Top" />
+                
+                <Button Content="Open" 
+                        DockPanel.Dock="Right" 
+                        Width="60"
+                        Height="23"
+                        Margin="10, 0, 0, 0" />
+                
+                <Button Content="Browse" 
+                        DockPanel.Dock="Right" 
+                        Width="60"
+                        Height="23"
+                        Margin="10, 0, 0, 0" />
+
+                <DockPanel Dock="Left">
+                    <TextBox Text="{Binding LogFilenameOptionalAppend}" />
+                </DockPanel>
+
+            </DockPanel>
+            
+            <DockPanel Dock="Left" Margin="0,5" Width="300">
+                
+                <TextBlock Text="Optional log filename append:" DockPanel.Dock="Top" />
+                
+                <Button Content="Clear" 
+                        DockPanel.Dock="Right" 
+                        Width="60"
+                        Height="23"
+                        Margin="10,0" />
+
+                <DockPanel Dock="Left">
+                    <TextBox Text="{Binding LogFilenameOptionalAppend}" />
+                </DockPanel>
+
+            </DockPanel>
+            
+            <DockPanel Dock="Right" Margin="0,5" Width="300">
+                
+                <TextBlock Text="Current log filename:" DockPanel.Dock="Top" />
+                
+                <TextBlock DockPanel.Dock="Bottom" Text="{Binding CurrentLogFilename}" />
+
+            </DockPanel>
+            
+            <DockPanel Dock="Right" Margin="0,5" Width="300">
+                
+                <TextBlock Text="Built log filename:" DockPanel.Dock="Top" />
+                
+                <TextBlock DockPanel.Dock="Bottom" Text="{Binding BuiltLogFilename}" />
+
+            </DockPanel>
+        </DockPanel>
+        
+        <UniformGrid Grid.Row="3" Grid.Column="1" Margin="5" Rows="1" Columns="6">
+            <DockPanel Dock="Left">
+                <TextBlock Text="COM Port:" DockPanel.Dock="Top"/>
+                <ComboBox DockPanel.Dock="Left" 
+                          ItemsSource="{Binding ComPorts}" 
+                          SelectedItem="{Binding SelectedComPort}"
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                    
+                </ComboBox>
+            </DockPanel>
+
+            <DockPanel Dock="Left" Margin="10,0,0,0">
+                <TextBlock Text="Baud Rate:" DockPanel.Dock="Top"/>
+                <ComboBox DockPanel.Dock="Left" 
+                          ItemsSource="{Binding BaudRates}" 
+                          SelectedItem="{Binding SelectedBaud}"
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                
+                </ComboBox>
+            </DockPanel>
+            
+            <DockPanel Dock="Left" Margin="10,0,0,0">
+                <TextBlock Text="Parity:" DockPanel.Dock="Top"/>
+                <ComboBox DockPanel.Dock="Left" 
+                          ItemsSource="{Binding ParityOptions}" 
+                          SelectedItem="{Binding SelectedParity}"
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                    
+                </ComboBox>
+            </DockPanel>
+            
+            <DockPanel Dock="Left" Margin="10,0,0,0">
+                <TextBlock Text="Data Bit:" DockPanel.Dock="Top"/>
+                <ComboBox DockPanel.Dock="Left" 
+                          ItemsSource="{Binding DataBitOptions}" 
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                    
+                </ComboBox>
+            </DockPanel>
+            
+            <DockPanel Dock="Left" Margin="10,0,0,0">
+                <TextBlock Text="Stop Bit:" DockPanel.Dock="Top"/>
+                <ComboBox DockPanel.Dock="Left" 
+                          ItemsSource="{Binding StopBitOptions}" 
+                          SelectedItem="{Binding SelectedStopBit}"
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                    
+                </ComboBox>
+            </DockPanel>
+            
+            <Button Content="Start New Log File"
+                    Command="{Binding StartNewLogFileCommand}"
+                    Margin="10,15,0,0"/>
+            
+        </UniformGrid>
 
     </Grid>
 </Window>

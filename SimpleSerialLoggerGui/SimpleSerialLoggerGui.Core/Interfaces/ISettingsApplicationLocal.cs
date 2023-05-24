@@ -1,4 +1,6 @@
-﻿namespace SimpleSerialLoggerGui.Core.Interfaces;
+﻿using System.Collections.Generic;
+
+namespace SimpleSerialLoggerGui.Core.Interfaces;
 
 
 /// <summary>
@@ -9,6 +11,9 @@ public interface ISettingsApplicationLocal
 {
     /// <inheritdoc cref="ISerialSelectionSettings" />
     public ISerialSelectionSettings SerialSelectionSettings { get; set; }
+    
+    /// <inheritdoc cref="ISerialPossibleOptionsSettings" />
+    public ISerialPossibleOptionsSettings SerialPossibleOptionsSettings { get; set; }
     
     /// <inheritdoc cref="ISerialLogSettings" />
     public ISerialLogSettings SerialLogSettings { get; set; }
@@ -32,17 +37,17 @@ public interface ISerialSelectionSettings
     /// <summary>
     /// Last parity setting the user had selected
     /// </summary>
-    string LastParity { get; set; }
+    bool LastParity { get; set; }
     
     /// <summary>
     /// Last data bit setting the user had selected
     /// </summary>
-    string LastDataBit { get; set; }
+    int LastDataBits { get; set; }
     
     /// <summary>
     /// Last stop bit setting the user had selected
     /// </summary>
-    string LastStopBit { get; set; }
+    string LastStopBits { get; set; }
 }
 
 /// <summary>
@@ -54,4 +59,30 @@ public interface ISerialLogSettings
     /// Last directory to save serial log data to that the user had selected
     /// </summary>
     public string LastDirectory { get; set; }
+}
+
+/// <summary>
+/// Settings related to serial port configuration
+/// </summary>
+public interface ISerialPossibleOptionsSettings
+{
+    /// <summary>
+    /// Available baud rates
+    /// </summary>
+    string BaudRates { get; set; }
+    
+    /// <summary>
+    /// Available data bits options
+    /// </summary>
+    string DataBits { get; set; }
+    
+    /// <summary>
+    /// Available stop bits options
+    /// </summary>
+    string StopBits { get; set; }
+
+    /// <summary>
+    /// Available parity bit options
+    /// </summary>
+    string ParityOptions { get; set; }
 }
