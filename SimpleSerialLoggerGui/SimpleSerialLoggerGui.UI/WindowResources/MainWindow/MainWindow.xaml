@@ -1,0 +1,81 @@
+﻿<Window x:Class="SimpleSerialLoggerGui.UI.WindowResources.MainWindow.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=PresentationFramework"
+        xmlns:mainWindow="clr-namespace:SimpleSerialLoggerGui.UI.WindowResources.MainWindow"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+        d:DataContext="{d:DesignInstance Type=mainWindow:MainWindowViewModel, IsDesignTimeCreatable=True}"
+        mc:Ignorable="d"
+        Style="{StaticResource StandardWindow}"
+        Title="SimpleSerialLoggerGui" Height="600" Width="1400"
+        Background="#222222">
+
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Closing">
+            <b:InvokeCommandAction Command="{Binding MainWindowOnClosingCommand}"/>
+        </b:EventTrigger>  
+    </b:Interaction.Triggers>  
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="10" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.Resources>
+
+            <!-- Design time dark backgrounds  -->
+            <Style TargetType="{x:Type ScrollViewer}">
+                <Style.Triggers>
+                    <Trigger Property="componentModel:DesignerProperties.IsInDesignMode" Value="True">
+                        <Setter Property="Background" Value="#333333" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <Style TargetType="{x:Type CheckBox}">
+                <Style.Triggers>
+                    <Trigger Property="componentModel:DesignerProperties.IsInDesignMode" Value="True">
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
+
+                <!-- I have no idea why this has to be done. It should already be set in CheckBoxStyles.xaml in Themes folder -->
+                <Setter Property="Background" Value="#555555" />
+            </Style>
+            
+            <Style TargetType="{x:Type TextBlock}">
+                <Style.Triggers>
+                    <Trigger Property="componentModel:DesignerProperties.IsInDesignMode" Value="True">
+                        <Setter Property="Foreground" Value="#FFFFFF" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+        </Grid.Resources>
+
+        <DockPanel Grid.Row="1" Grid.Column="1" Margin="5">
+            <Border BorderBrush="Gray" BorderThickness="1" Padding="2">
+                <DockPanel>
+                    <ScrollViewer>
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding LocalSessionPersistentState.SettingsSections }"
+                                          ItemTemplate="{StaticResource SettingsSectionTemplate}"
+                                          Padding="0" Margin="0" />
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </DockPanel>
+
+    </Grid>
+</Window>
