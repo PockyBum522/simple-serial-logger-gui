@@ -58,7 +58,7 @@ public class SerialLogger
     }
 
     /// <summary>
-    /// Starts a new serial log to file and passed TextBox
+    /// Starts a new serial log to file and passed TextBox 
     /// </summary>
     /// <param name="fullPathToLogfile">Full path to logfile</param>
     public void StartLogging(string fullPathToLogfile)
@@ -88,13 +88,7 @@ public class SerialLogger
 
         try
         {
-            var bytesToRead = _currentSerialPort.BytesToRead;
-
-            // Read lines while we still have available data
-            while (bytesToRead > 0 && _currentSerialPort.IsOpen)
-            {
-                bytesToRead = LogUntilEndingCharacterOrNoMoreData(bytesToRead);
-            }
+            LogUntilEndingCharacterOrNoMoreData();
         }
         catch (OperationCanceledException)
         {
@@ -102,85 +96,72 @@ public class SerialLogger
         }
     }
 
-    private int LogUntilEndingCharacterOrNoMoreData(int bytesToRead)
+    private void LogUntilEndingCharacterOrNoMoreData()
     {
         if (_serialSerilogLogger is null) throw new NullReferenceException();
         if (_currentSerialPort is null) throw new NullReferenceException();
         
-        var incomingDataBuffer = new char[1000];
-        var currentBufferPosition = 0;
-
-        // Read until ending char found or we run out of available data
-        while (bytesToRead > 0 && _currentSerialPort.IsOpen)
+        var incomingDataByte = new byte[1];
+        var builtString = "";
+        int bytesToRead;
+        
+        do
         {
-            _currentSerialPort.Read(incomingDataBuffer, currentBufferPosition, 1);
-            currentBufferPosition++;
+            // Read a single character
+            _currentSerialPort.Read(incomingDataByte, 0, 1);
 
-            // Check for line ending char(s)
-            if (_currentLogFormatting?.LineEndingDetectionType == LogDataLineEndingDetectionType.Newline &&
-                incomingDataBuffer.Contains('\n'))
-            {
-                break;    
-            }
-            
-            if (_currentLogFormatting?.LineEndingDetectionType == LogDataLineEndingDetectionType.DecimalValue &&
-                incomingDataBuffer.Contains((char)int.Parse(_currentLogFormatting.LineEndingDetectionValue)))
-            {
-                break;    
-            }
+            builtString += GetNextFormattedSection(incomingDataByte[0]);
+
+            if (CharacterIsEndLineChar(incomingDataByte[0])) break;
 
             bytesToRead = _currentSerialPort.BytesToRead;
-        }
-
-        var bufferString = CreateLogLineOutputPerLogFormatting(incomingDataBuffer, currentBufferPosition);
-
-        if (incomingDataBuffer[0] != new char())
-            _serialSerilogLogger.Information("{IncomingData}", bufferString);
+        } 
+        while (bytesToRead > 0);
         
-        return bytesToRead;
+        // If we got here either bytesToRead was 0 or endLineCharacter detected
+        CreateLogLineOutputPerLogFormatting(builtString);
     }
 
-    private string CreateLogLineOutputPerLogFormatting(char[] incomingDataBuffer, int currentBufferPosition)
+    private void CreateLogLineOutputPerLogFormatting(string builtString)
+    {
+        if (_currentLogFormatting is null) throw new NullReferenceException();
+        if (_serialSerilogLogger is null) throw new NullReferenceException();
+
+        builtString = builtString.TrimEnd();
+        builtString = builtString.TrimEnd(',');
+
+        _serialSerilogLogger.Information("{SerialLogLine}", builtString);
+    }
+
+    private bool CharacterIsEndLineChar(byte charToCheck)
     {
         if (_currentLogFormatting is null) throw new NullReferenceException();
 
-        var bufferString = "";
+        if (_currentLogFormatting.LineEndingDetectionType == LogDataLineEndingDetectionType.Uninitialized)
+            throw new ArgumentException("You must select a line ending detection character");
 
-        for (var i = 0; i < currentBufferPosition; i++)
+        int valueToMatchAsEndline = 0;
+
+        switch (_currentLogFormatting.LineEndingDetectionType)
         {
-            if (_currentLogFormatting.LineEndingDetectionType == LogDataLineEndingDetectionType.Newline)
-            {
-                if (incomingDataBuffer[i] == '\n') break;
-            }
+            case LogDataLineEndingDetectionType.Newline:
+                valueToMatchAsEndline = '\n';
+                break;
             
-            if (_currentLogFormatting.LineEndingDetectionType == LogDataLineEndingDetectionType.DecimalValue)
-            {
-                if (incomingDataBuffer[i] == int.Parse(_currentLogFormatting.LineEndingDetectionValue))
-                {
-                    bufferString += GetNextFormattedSection(incomingDataBuffer[i]); // have to add it if it's not a newline
-                    
-                    break;
-                }
-            }
-
-            if (_currentLogFormatting.LogAsDisplayType == LogDataDisplayType.Ascii &&
-                !_currentLogFormatting.LogWithNewlineCharacters)
-            {
-                if (!_currentLogFormatting.LogWithNewlineCharacters && incomingDataBuffer[i] == '\r') break; 
-                if (!_currentLogFormatting.LogWithNewlineCharacters && incomingDataBuffer[i] == '\n') break;    
-            }
-
-            bufferString += GetNextFormattedSection(incomingDataBuffer[i]);
+            case LogDataLineEndingDetectionType.DecimalValue:
+                valueToMatchAsEndline = int.Parse(_currentLogFormatting.LineEndingDetectionValue);
+                break;
+            
+            default:
+                throw new NotImplementedException();
         }
-        
-        bufferString = bufferString.TrimEnd();
-        bufferString = bufferString.TrimEnd(',');
-        bufferString = bufferString.TrimEnd();
 
-        return bufferString;
+        if (charToCheck == valueToMatchAsEndline) return true;
+
+        return false;
     }
 
-    private string GetNextFormattedSection(char characterToWork)
+    private string GetNextFormattedSection(byte characterToWork)
     {
         if (_currentLogFormatting is null) throw new NullReferenceException();
 
@@ -194,11 +175,11 @@ public class SerialLogger
             
             case LogDataDisplayType.Hex:
                 returnString = "0x";
-                returnString += Convert.ToByte(characterToWork).ToString("X2");
+                returnString += characterToWork.ToString("X2");
                 break;
             
             case LogDataDisplayType.Decimal:
-                returnString = Convert.ToByte(characterToWork).ToString("D3");
+                returnString = characterToWork.ToString("D3");
                 break;
             
             default:
@@ -263,9 +244,5 @@ public class SerialLogger
         }
         
         _currentSerialPort.Close();
-        
-        _serialSerilogLogger = null;
-
-        _currentSerialPort = null;
     }
 }

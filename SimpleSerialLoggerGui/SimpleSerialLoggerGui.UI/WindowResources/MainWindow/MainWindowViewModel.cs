@@ -70,10 +70,15 @@ public partial class MainWindowViewModel : ObservableObject
     /// Constructor for dependency injection
     /// </summary>
     /// <param name="logger">Injected ILogger to use</param>
+    /// <param name="uiThreadDispatcher">UI Thread dispatcher so we can invoke UI changes later</param>
     /// <param name="serialLogger">Injected SerialLogger</param>
     /// <param name="settingsApplicationLocal">ISettingsApplicationLocal proxy object from Config.net that was set up in DIContainerBuilder.cs</param>
     /// <param name="serialPortHelpers">Injected serial port helpers</param>
-    public MainWindowViewModel(ILogger logger, Dispatcher uiThreadDispatcher, SerialLogger serialLogger, ISettingsApplicationLocal settingsApplicationLocal, SerialPortHelpers serialPortHelpers)
+    public MainWindowViewModel(ILogger logger, 
+        Dispatcher uiThreadDispatcher,
+        SerialLogger serialLogger,
+        ISettingsApplicationLocal settingsApplicationLocal,
+        SerialPortHelpers serialPortHelpers)
     {
         _logger = logger;
         _uiThreadDispatcher = uiThreadDispatcher;
@@ -296,6 +301,8 @@ public partial class MainWindowViewModel : ObservableObject
 
         // This looks fine for a default option
         IsCheckedLogAsAscii = true;
+
+        IsCheckedLineEndingDetectionOnNewLine = true;
     }
     
     private void LoadCommaSeparatedOptions(ICollection<string> listToLoad, string settingToSplit)

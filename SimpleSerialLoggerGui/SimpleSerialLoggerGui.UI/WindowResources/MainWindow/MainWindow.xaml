@@ -203,12 +203,12 @@
 
             <DockPanel Dock="Left" Margin="10,0,0,0">
                 <TextBlock Text="Baud Rate:" DockPanel.Dock="Top"/>
-                <ComboBox DockPanel.Dock="Left" 
-                          ItemsSource="{Binding BaudRates}" 
-                          SelectedItem="{Binding SelectedBaud, Mode=TwoWay}"
-                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
+                <!-- <ComboBox DockPanel.Dock="Left"  -->
+                <!--           ItemsSource="{Binding BaudRates}"  -->
+                <!--           SelectedItem="{Binding SelectedBaud, Mode=TwoWay}" -->
+                <!--           IsEnabled="{Binding ComPortSettingsControlsEnabled}"> -->
                 
-                </ComboBox>
+                <TextBox Text="{Binding SelectedBaud}" />
             </DockPanel>
             
             <DockPanel Dock="Left" Margin="10,0,0,0">

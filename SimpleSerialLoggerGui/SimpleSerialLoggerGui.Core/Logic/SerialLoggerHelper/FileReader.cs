@@ -3,8 +3,16 @@ using System.Text;
 
 namespace SimpleSerialLoggerGui.Core.Logic.SerialLoggerHelper;
 
+/// <summary>
+/// Methods for reading a file without locking it
+/// </summary>
 public class FileReader
 {
+    /// <summary>
+    /// Reads a file without locking it
+    /// </summary>
+    /// <param name="filePathToRead">Full path to the file to read</param>
+    /// <returns>File contents</returns>
     public string ReadFileWithoutLocking(string filePathToRead)
     {
         byte[]? oFileBytes;
