@@ -13,6 +13,9 @@ WPF and .NET 7+ Simple serial port log to file
 * Logging with: Spaces as separator, commas as separator, both, none
 * Logging newline characters or not
 
+* Newline detection: On '\n'
+* Newline detection: On custom decimal value
+
 # What doesn't work
 
 * Everything else
