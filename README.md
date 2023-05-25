@@ -1,13 +1,14 @@
 # simple-serial-logger-gui
 WPF and .NET 7+ Simple serial port log to file
 
-![image](https://github.com/PockyBum522/simple-serial-logger-gui/assets/1970959/ce86da53-3aa8-4ad2-93b7-01f176e61d73)
+![image](https://github.com/PockyBum522/simple-serial-logger-gui/assets/1970959/c8a039cb-f8a9-4a6c-8beb-8585c6c773b0)
 
 # What works
 
 * Opening serial port with dropdown options
 * Dropdown options populated from settings (See example configuration info below)
 * Logging to a file (Read in realtime with VSCode)
+* Logging displays in "Serial log" textbox
 * Logging as: ASCII, Hex, Decimal
 * Logging with: Spaces as separator, commas as separator, both, none
 * Logging newline characters or not
