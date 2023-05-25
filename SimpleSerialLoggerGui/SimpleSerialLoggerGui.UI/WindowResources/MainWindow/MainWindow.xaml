@@ -12,7 +12,8 @@
         mc:Ignorable="d"
         Style="{StaticResource StandardWindow}"
         Title="SimpleSerialLoggerGui" Height="600" Width="1400"
-        Background="#222222">
+        Background="#222222"
+        Loaded="MainWindow_OnLoaded">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -130,7 +131,7 @@
                 </Border>
                 
                 <DockPanel Dock="Left">
-                    <TextBox Text="{Binding TextSendToSerial }" />
+                    <TextBox Text="{Binding SendToSerialData, Mode=TwoWay }" />
                 </DockPanel>
 
             </DockPanel>
@@ -152,7 +153,7 @@
                         Margin="10, 0, 0, 0" />
 
                 <DockPanel Dock="Left">
-                    <TextBox Text="{Binding PathToSaveLogsIn }" />
+                    <TextBox Text="{Binding PathToSaveLogsIn, Mode=TwoWay}" />
                 </DockPanel>
 
             </DockPanel>

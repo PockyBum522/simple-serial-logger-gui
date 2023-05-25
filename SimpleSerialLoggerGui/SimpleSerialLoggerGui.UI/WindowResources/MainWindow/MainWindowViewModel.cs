@@ -49,8 +49,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _isCheckedLineEndingDetectionOnNewLine;
     [ObservableProperty] private bool _isCheckedLineEndingDetectionOnHexValue;
     [ObservableProperty] private bool _isCheckedLineEndingDetectionOnDecimalValue;
-    [ObservableProperty] private string _hexValueForLineEndingDetection;
-    [ObservableProperty] private string _decimalValueForLineEndingDetection;
+    [ObservableProperty] private string _hexValueForLineEndingDetection = "";
+    [ObservableProperty] private string _decimalValueForLineEndingDetection = "";
 
     [ObservableProperty] private bool _comPortSettingsControlsEnabled = true;
     
@@ -85,35 +85,28 @@ public partial class MainWindowViewModel : ObservableObject
         _serialLogger = serialLogger;
         _settingsApplicationLocal = settingsApplicationLocal;
         _serialPortHelpers = serialPortHelpers;
-
-        LoadStoredSettingsIntoWindow();
-
-        InitializeNecessaryControls();
-
-        Task.Run(UpdateLogTextboxWithFileContents);
     }
 
     private async Task UpdateLogTextboxWithFileContents()
     {
-        var lastFileLinesCount = 0;
         var lastFileData = "";
 
         while (true)
         {
             var fileReader = new FileReader();
             
+            await Task.Delay(50);
+            
             var newestLogFilePath = FolderHelpers.GetNewestFileIn(PathToSaveLogsIn, "*.log");
-
-            await Task.Delay(10);
             
             var fileData = fileReader.ReadFileWithoutLocking(newestLogFilePath);
 
             if (lastFileData == fileData) continue;
 
-            lastFileData = fileData;
-
             _uiThreadDispatcher.Invoke(() =>
             {
+                lastFileData = fileData;
+            
                 CurrentSerialLog = fileData;
             });
         }
@@ -122,17 +115,9 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void StartNewLogFile()
     {
-        if (string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialLogSettings.LastDirectory))
-        {
-            MessageBox.Show("Log to directory is empty or invalid. Please set a directory to log serial data to and try again.");
-            return;
-        }
+        WarnUserIfAnySettingsInvalid();
 
-        if (string.IsNullOrWhiteSpace(SelectedComPort))
-        {
-            MessageBox.Show("Please pick a serial port");
-            return;
-        }
+        SaveAllUserSettingsToConfiguration();
         
         var logFormatSettings = new LogFormatting()
         {
@@ -166,6 +151,99 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Update CurrentLogFilename
 
+    }
+
+    private void WarnUserIfAnySettingsInvalid()
+    {
+        if (string.IsNullOrWhiteSpace(PathToSaveLogsIn))
+        {
+            MessageBox.Show("Log to directory is empty or invalid. Please set a directory to log serial data to and try again.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(SelectedComPort))
+        {
+            MessageBox.Show("Please pick a serial port");
+            return;
+        }
+        
+        if (string.IsNullOrWhiteSpace(SelectedBaud))
+        {
+            MessageBox.Show("Please pick a baud rate");
+            return;
+        }
+
+        if (!IsCheckedLogAsAscii &&
+            !IsCheckedLogAsHex &&
+            !IsCheckedLogAsDecimal)
+        {
+            MessageBox.Show("You must select a value to display logged bytes as");
+            return;
+        }
+        
+        // Line ending detection
+        if (!IsCheckedLineEndingDetectionOnNewLine &&
+            !IsCheckedLineEndingDetectionOnDecimalValue &&
+            !IsCheckedLineEndingDetectionOnHexValue)
+        {
+            MessageBox.Show("You must select a criteria for line endings");
+            return;
+        }
+        
+        if (IsCheckedLineEndingDetectionOnDecimalValue &&
+            string.IsNullOrWhiteSpace(DecimalValueForLineEndingDetection))
+        {
+            MessageBox.Show("You must enter a value to match on for line endings under decimal");
+            return;
+        }
+        
+        if (IsCheckedLineEndingDetectionOnHexValue &&
+            string.IsNullOrWhiteSpace(HexValueForLineEndingDetection))
+        {
+            MessageBox.Show("You must enter a value to match on for line endings under hex");
+            return;
+        }
+    }
+
+    private void SaveAllUserSettingsToConfiguration()
+    {
+        // Load last selected settings, if valid
+        _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastBaud = SelectedBaud;
+
+        _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastParity = SelectedParity;
+
+        _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastDataBits = SelectedDataBits;
+
+        _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastStopBits = SelectedStopBits;
+
+        _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastComPort = SelectedComPort;
+
+        // Log bytes as display selections
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsAsciiState = IsCheckedLogAsAscii;
+
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsHexState = IsCheckedLogAsHex;
+
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsDecimalState = IsCheckedLogAsDecimal;
+
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithSpacesState = IsCheckedLogWithSpaces;
+
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithCommasState = IsCheckedLogWithCommas;
+
+        _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithNewlineCharactersState = IsCheckedLogNewlineCharacters;
+
+        // Line ending detection settings
+        _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectNewlinesState = IsCheckedLineEndingDetectionOnNewLine;
+
+        _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectHexValueChecked = IsCheckedLineEndingDetectionOnHexValue;
+
+        _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectDecimalValueChecked = IsCheckedLineEndingDetectionOnDecimalValue;
+
+        _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDecimalCustomTextState = DecimalValueForLineEndingDetection;
+        
+        _settingsApplicationLocal.LineEndingDetectionUserSelections.LastHexCustomTextState = HexValueForLineEndingDetection;
+
+        // Path for logs directory
+        _settingsApplicationLocal.SerialLogSettings.LastDirectory = PathToSaveLogsIn;
     }
 
     private string SetLineEndingValueFromUi()
@@ -260,26 +338,59 @@ public partial class MainWindowViewModel : ObservableObject
         LoadCommaSeparatedOptions(StopBitOptions, _settingsApplicationLocal.SerialPossibleOptionsSettings.StopBits);
 
         // Load last selected settings, if valid
-        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastBaud))
-            SelectedBaud = _settingsApplicationLocal.SerialSelectionSettings.LastBaud;
+        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastBaud))
+            SelectedBaud = _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastBaud;
 
-        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastParity))
-            SelectedParity = _settingsApplicationLocal.SerialSelectionSettings.LastParity;
+        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastParity))
+            SelectedParity = _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastParity;
 
-        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastDataBits))
-            SelectedDataBits = _settingsApplicationLocal.SerialSelectionSettings.LastDataBits;
+        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastDataBits))
+            SelectedDataBits = _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastDataBits;
 
-        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastStopBits))
-            SelectedStopBits = _settingsApplicationLocal.SerialSelectionSettings.LastStopBits;
+        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastStopBits))
+            SelectedStopBits = _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastStopBits;
 
-        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialSelectionSettings.LastComPort) &&
-            _serialPortHelpers.SerialPortExists(SelectedComPort = _settingsApplicationLocal.SerialSelectionSettings.LastComPort))
+        if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastComPort) &&
+            _serialPortHelpers.SerialPortExists(_settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastComPort))
         {
-            SelectedComPort = _settingsApplicationLocal.SerialSelectionSettings.LastComPort;
-
-            return;
+            SelectedComPort = _settingsApplicationLocal.SerialPortSettingsSelectionsSelections.LastComPort;
         }
+        
+        // Log bytes as display selections
+        IsCheckedLogAsAscii =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsAsciiState;
 
+        IsCheckedLogAsHex =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsHexState;
+
+        IsCheckedLogAsDecimal =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayAsDecimalState;
+
+        IsCheckedLogWithSpaces =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithSpacesState;
+
+        IsCheckedLogWithCommas =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithCommasState;
+
+        IsCheckedLogNewlineCharacters =
+            _settingsApplicationLocal.SerialDataDisplayUserSelections.LastDisplayWithNewlineCharactersState;
+        
+        // Line ending detection settings
+        IsCheckedLineEndingDetectionOnNewLine =
+            _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectNewlinesState;
+
+        IsCheckedLineEndingDetectionOnHexValue =
+            _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectHexValueChecked;
+
+        IsCheckedLineEndingDetectionOnDecimalValue =
+            _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDetectDecimalValueChecked;
+
+        DecimalValueForLineEndingDetection =
+            _settingsApplicationLocal.LineEndingDetectionUserSelections.LastDecimalCustomTextState;
+
+        HexValueForLineEndingDetection =
+            _settingsApplicationLocal.LineEndingDetectionUserSelections.LastHexCustomTextState;
+        
         // Load directory to save logs to
         if (!string.IsNullOrWhiteSpace(_settingsApplicationLocal.SerialLogSettings.LastDirectory))
         {
@@ -290,9 +401,6 @@ public partial class MainWindowViewModel : ObservableObject
             BuiltLogFilename = "Please select logs directory first!";
             CurrentLogFilename = "Please select logs directory first!";
         }
-
-        // Otherwise:
-        SelectedComPort = "";
     }
     
     private void InitializeNecessaryControls()
@@ -331,5 +439,17 @@ public partial class MainWindowViewModel : ObservableObject
         if (sender is null) return;
         
         ((Window)sender).Hide();
+    }
+
+    /// <summary>
+    /// Called from the XAML when window is loaded
+    /// </summary>
+    public void OnWindowLoaded()
+    {
+        InitializeNecessaryControls();
+        
+        LoadStoredSettingsIntoWindow();
+        
+        Task.Run(UpdateLogTextboxWithFileContents);
     }
 }

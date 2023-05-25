@@ -8,8 +8,8 @@ namespace SimpleSerialLoggerGui.Core.Interfaces;
 /// </summary>
 public interface ISettingsApplicationLocal
 {
-    /// <inheritdoc cref="ISerialSelectionSettings" />
-    public ISerialSelectionSettings SerialSelectionSettings { get; set; }
+    /// <inheritdoc cref="ISerialPortSettingsSelections" />
+    public ISerialPortSettingsSelections SerialPortSettingsSelectionsSelections { get; set; }
     
     /// <inheritdoc cref="ISerialPossibleOptionsSettings" />
     public ISerialPossibleOptionsSettings SerialPossibleOptionsSettings { get; set; }
@@ -18,13 +18,19 @@ public interface ISettingsApplicationLocal
     public ISerialLogSettings SerialLogSettings { get; set; }
     
     /// <inheritdoc cref="IApplicationSettings" />
-    IApplicationSettings ApplicationSettings { get; set; }
+    public IApplicationSettings ApplicationSettings { get; set; }
+    
+    /// <inheritdoc cref="LineEndingDetectionUserSelections" />
+    public ILineEndingSelectionSettings LineEndingDetectionUserSelections  { get; set; }
+    
+    /// <inheritdoc cref="ILogByteDisplaySelectionSettings" />
+    public ILogByteDisplaySelectionSettings SerialDataDisplayUserSelections { get; set; }
 }
 
 /// <summary>
 /// Settings related to serial port configuration
 /// </summary>
-public interface ISerialSelectionSettings
+public interface ISerialPortSettingsSelections
 {
     /// <summary>
     /// Last com port the user had selected
@@ -50,6 +56,93 @@ public interface ISerialSelectionSettings
     /// Last stop bit setting the user had selected
     /// </summary>
     string LastStopBits { get; set; }
+}
+
+/// <summary>
+/// Settings related to "Log bytes as" user selections
+/// </summary>
+public interface ILogByteDisplaySelectionSettings
+{
+    /// <summary>
+    /// Whether the user had "Display as ASCII" checkbox checked
+    /// </summary>
+    bool LastDisplayAsAsciiState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had "Display as HEX" checkbox checked
+    /// </summary>
+    bool LastDisplayAsHexState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had "Display as DEC" checkbox checked
+    /// </summary>
+    bool LastDisplayAsDecimalState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had "Display with spaces" checkbox checked
+    /// </summary>
+    bool LastDisplayWithSpacesState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had "Display with CSVs" checkbox checked
+    /// </summary>
+    bool LastDisplayWithCommasState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had "Display with CSVs" checkbox checked
+    /// </summary>
+    bool LastDisplayWithNewlineCharactersState { get; set; }
+}
+
+/// <summary>
+/// Settings related to "Line ending detections" user selections
+/// </summary>
+public interface ILineEndingSelectionSettings
+{
+    /// <summary>
+    /// Whether the user had '\n' checkbox checked
+    /// </summary>
+    bool LastDetectNewlinesState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had '\r' checkbox checked
+    /// </summary>
+    bool LastDetectCarriageReturnsState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had '\r\n' checkbox checked
+    /// </summary>
+    bool LastDetectNewlineAndCarriageReturnsState { get; set; }
+    
+    /// <summary>
+    /// Whether the user had 'Custom Hex Value' checkbox checked
+    /// </summary>
+    bool LastDetectHexValueChecked { get; set; }
+    
+    /// <summary>
+    /// Whether the user had 'Custom Decimal Value' checkbox checked
+    /// </summary>
+    bool LastDetectDecimalValueChecked { get; set; }
+    
+    /// <summary>
+    /// Whether the user had 'Custom Millis Value' checkbox checked
+    /// </summary>
+    bool LastDetectMillisValueChecked { get; set; }
+    
+    /// <summary>
+    /// What the user had for a custom hex value
+    /// </summary>
+    string LastHexCustomTextState { get; set; }
+    
+    /// <summary>
+    /// What the user had for a custom decimal value
+    /// </summary>
+    string LastDecimalCustomTextState { get; set; }
+    
+    /// <summary>
+    /// What the user had for a custom millis value
+    /// </summary>
+    string LastMillisCustomTextState { get; set; }
 }
 
 /// <summary>

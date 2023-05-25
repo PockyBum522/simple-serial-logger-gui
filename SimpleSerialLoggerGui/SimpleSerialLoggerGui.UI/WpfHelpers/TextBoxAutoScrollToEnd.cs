@@ -5,14 +5,19 @@ using System.Windows.Controls;
 
 namespace SimpleSerialLoggerGui.UI.WpfHelpers;
 
+
+/// <summary>
+/// Behavior that scrolls the WPF textbox to its end automatically when the contents change
+/// </summary>
 public class TextBoxAutoScrollToEnd
 {
     static readonly Dictionary<TextBox, Capture> _associations = new Dictionary<TextBox, Capture>();
-
+    
     public static bool GetScrollOnTextChanged(DependencyObject dependencyObject)
     {
         return (bool)dependencyObject.GetValue(ScrollOnTextChangedProperty);
     }
+
 
     public static void SetScrollOnTextChanged(DependencyObject dependencyObject, bool value)
     {

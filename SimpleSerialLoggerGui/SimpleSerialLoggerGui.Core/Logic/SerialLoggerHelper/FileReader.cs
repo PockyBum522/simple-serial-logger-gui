@@ -17,8 +17,6 @@ public class FileReader
     {
         byte[]? oFileBytes;
 
-        var stringBuilder = new StringBuilder(2048);
-
         using var fs = System.IO.File.Open(filePathToRead, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
         
         var numBytesToRead = Convert.ToInt32(fs.Length);
