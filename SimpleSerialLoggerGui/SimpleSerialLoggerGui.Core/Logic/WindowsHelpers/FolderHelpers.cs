@@ -17,7 +17,7 @@ public class FolderHelpers
     /// <param name="fullFolderPath">The directory to look in</param>
     /// <param name="searchPattern">Pattern to match, defaults to *.*</param>
     /// <returns>The filename (not full path) of the newest file</returns>
-    public static string GetNewestFileNameIn(string fullFolderPath, string searchPattern = "*.*")
+    public static string GetNewestFileIn(string fullFolderPath, string searchPattern = "*.*")
     {
         var files = new DirectoryInfo(fullFolderPath).GetFiles(searchPattern);
         var newestFile = "";
@@ -30,7 +30,7 @@ public class FolderHelpers
                 
             // Otherwise:
             lastModified = file.LastWriteTime;
-            newestFile = file.Name;
+            newestFile = file.FullName;
         }
         
         return newestFile;

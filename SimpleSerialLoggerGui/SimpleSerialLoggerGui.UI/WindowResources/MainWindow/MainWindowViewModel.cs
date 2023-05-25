@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
@@ -10,7 +14,9 @@ using Serilog.Core;
 using SimpleSerialLoggerGui.Core;
 using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.SerialLoggerHelper;
+using SimpleSerialLoggerGui.Core.Logic.WindowsHelpers;
 using SimpleSerialLoggerGui.Core.Models;
+using SimpleSerialLoggerGui.Core.Models.Enums;
 
 namespace SimpleSerialLoggerGui.UI.WindowResources.MainWindow;
 
@@ -32,6 +38,13 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _selectedParity = "";
     [ObservableProperty] private string _selectedDataBits = "";
     [ObservableProperty] private string _selectedStopBits = "";
+    
+    [ObservableProperty] private bool _isCheckedLogAsAscii;
+    [ObservableProperty] private bool _isCheckedLogAsHex;
+    [ObservableProperty] private bool _isCheckedLogAsDecimal;
+    [ObservableProperty] private bool _isCheckedLogWithSpaces;
+    [ObservableProperty] private bool _isCheckedLogWithCommas;
+    [ObservableProperty] private bool _isCheckedLogNewlineCharacters;
 
     [ObservableProperty] private bool _comPortSettingsControlsEnabled = true;
     
@@ -42,6 +55,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _stopBitOptions = new();
     
     private readonly ILogger _logger;
+    private readonly Dispatcher _uiThreadDispatcher;
     private readonly SerialLogger _serialLogger;
     private readonly ISettingsApplicationLocal _settingsApplicationLocal;
     private readonly SerialPortHelpers _serialPortHelpers;
@@ -53,9 +67,10 @@ public partial class MainWindowViewModel : ObservableObject
     /// <param name="serialLogger">Injected SerialLogger</param>
     /// <param name="settingsApplicationLocal">ISettingsApplicationLocal proxy object from Config.net that was set up in DIContainerBuilder.cs</param>
     /// <param name="serialPortHelpers">Injected serial port helpers</param>
-    public MainWindowViewModel(ILogger logger, SerialLogger serialLogger, ISettingsApplicationLocal settingsApplicationLocal, SerialPortHelpers serialPortHelpers)
+    public MainWindowViewModel(ILogger logger, Dispatcher uiThreadDispatcher, SerialLogger serialLogger, ISettingsApplicationLocal settingsApplicationLocal, SerialPortHelpers serialPortHelpers)
     {
         _logger = logger;
+        _uiThreadDispatcher = uiThreadDispatcher;
         _serialLogger = serialLogger;
         _settingsApplicationLocal = settingsApplicationLocal;
         _serialPortHelpers = serialPortHelpers;
@@ -63,8 +78,36 @@ public partial class MainWindowViewModel : ObservableObject
         LoadStoredSettingsIntoWindow();
 
         InitializeNecessaryControls();
+
+        Task.Run(UpdateLogTextboxWithFileContents);
     }
-    
+
+    private async Task UpdateLogTextboxWithFileContents()
+    {
+        var lastFileLinesCount = 0;
+        var lastFileData = "";
+
+        while (true)
+        {
+            var fileReader = new FileReader();
+            
+            var newestLogFilePath = FolderHelpers.GetNewestFileIn(PathToSaveLogsIn, "*.log");
+
+            await Task.Delay(10);
+            
+            var fileData = fileReader.ReadFileWithoutLocking(newestLogFilePath);
+
+            if (lastFileData == fileData) continue;
+
+            lastFileData = fileData;
+
+            _uiThreadDispatcher.Invoke(() =>
+            {
+                CurrentSerialLog = fileData;
+            });
+        }
+    }
+
     [RelayCommand]
     private void StartNewLogFile()
     {
@@ -80,6 +123,25 @@ public partial class MainWindowViewModel : ObservableObject
             return;
         }
 
+        var displayType = LogDataDisplayType.Uninitialized;
+
+        if (IsCheckedLogAsAscii)
+            displayType = LogDataDisplayType.Ascii;
+
+        if (IsCheckedLogAsHex)
+            displayType = LogDataDisplayType.Hex;
+
+        if (IsCheckedLogAsDecimal)
+            displayType = LogDataDisplayType.Decimal;
+        
+        var logFormatSettings = new LogFormatting()
+        {
+            LogAsDisplayType = displayType,
+            LogWithCommas = IsCheckedLogWithCommas,
+            LogWithSpaces = IsCheckedLogWithSpaces,
+            LogWithNewlineCharacters = IsCheckedLogNewlineCharacters
+        };
+
         var serialSettings = new SerialPortSettings()
         {
             BaudRate = int.Parse(SelectedBaud),
@@ -90,7 +152,7 @@ public partial class MainWindowViewModel : ObservableObject
         };
         
         // Open com port with user selected settings
-        _serialLogger.OpenComPort(serialSettings);
+        _serialLogger.OpenComPort(serialSettings, logFormatSettings);
         
         // Disable com port controls from changes allowed
         ComPortSettingsControlsEnabled = false;
@@ -185,6 +247,9 @@ public partial class MainWindowViewModel : ObservableObject
     private void InitializeNecessaryControls()
     {
         SelectedComPort = _serialPortHelpers.GetFirstSerialPortOnSystem();
+
+        // This looks fine for a default option
+        IsCheckedLogAsAscii = true;
     }
     
     private void LoadCommaSeparatedOptions(ICollection<string> listToLoad, string settingToSplit)

@@ -121,7 +121,7 @@ public partial class TrayIconViewModel : ObservableObject, ITrayIconViewModel
         
         var vscodeProcess = new Process();
 
-        var newestFileName = FolderHelpers.GetNewestFileNameIn(ApplicationPaths.LogAppBasePath);
+        var newestFileName = FolderHelpers.GetNewestFileIn(ApplicationPaths.LogAppBasePath);
         
         const string vsCodePath = @"C:\Program Files\Microsoft VS Code\Code.exe";
 
