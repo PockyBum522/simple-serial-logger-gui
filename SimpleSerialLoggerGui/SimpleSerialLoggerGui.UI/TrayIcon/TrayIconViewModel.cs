@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -6,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 using SimpleSerialLoggerGui.Core;
+using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.WindowsHelpers;
 using SimpleSerialLoggerGui.UI.Interfaces;
 using SimpleSerialLoggerGui.UI.WindowResources.MainWindow;
@@ -19,6 +21,7 @@ namespace SimpleSerialLoggerGui.UI.TrayIcon;
 public partial class TrayIconViewModel : ObservableObject, ITrayIconViewModel
 {
     private readonly ILogger _logger;
+    private readonly ISettingsApplicationLocal _settingsApplicationLocal;
 
     private readonly MainWindowViewModel _mainWindowViewModel;
     private readonly MainWindow _mainWindow;
@@ -31,17 +34,20 @@ public partial class TrayIconViewModel : ObservableObject, ITrayIconViewModel
     /// Constructor for dependency injection
     /// </summary>
     /// <param name="logger">Injected logger to use</param>
+    /// <param name="settingsApplicationLocal">Injected settings proxy object from Config.net</param>
+    /// <param name="mainWindowViewModel">Main window ViewModel for the application</param>
     /// <param name="mainWindow">Main window view for the application</param>
     /// <param name="settingsViewModel">Injected settings window viewmodel to use</param>
-    /// <param name="mainWindowViewModel">Main window ViewModel for the application</param>
     // /// <param name="settingsAppLocal">Injected application local settings to use</param>
     public TrayIconViewModel(ILogger logger,
+        ISettingsApplicationLocal settingsApplicationLocal,
         MainWindowViewModel mainWindowViewModel,
         MainWindow mainWindow,
         SettingsViewModel settingsViewModel) //, ISettingsApplicationLocal settingsAppLocal)
     {
         _logger = logger;
-        
+        _settingsApplicationLocal = settingsApplicationLocal;
+
         _mainWindow = mainWindow;
         _mainWindowViewModel = mainWindowViewModel;
         _mainWindow.DataContext = _mainWindowViewModel;
@@ -49,8 +55,6 @@ public partial class TrayIconViewModel : ObservableObject, ITrayIconViewModel
 
         _logger.Information("Initializing Tray Icon View");
         
-        //_settingsAppLocal = settingsAppLocal;
-
         _settingsWindow = new()
         {
             DataContext = settingsViewModel
@@ -59,6 +63,9 @@ public partial class TrayIconViewModel : ObservableObject, ITrayIconViewModel
         _settingsWindow.Hide();
         
         _logger.Information("Hid settings window, tray icon init finished");
+        
+        if (_settingsApplicationLocal.ApplicationSettings.ShowMainWindowOnStartup)
+            _mainWindow.Show();
     }
     
     /// <summary>

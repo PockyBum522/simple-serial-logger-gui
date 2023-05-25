@@ -17,13 +17,14 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10" />
             <RowDefinition Height="1*" />
-            <RowDefinition Height="98" />
+            <RowDefinition Height="158" />
             <RowDefinition Height="55" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
             <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
 
@@ -61,10 +62,16 @@
 
         <DockPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,5">
             
-            <DockPanel DockPanel.Dock="Right" LastChildFill="False" Margin="10,0,0,0">
-                <Button Content="Clear Log Box (Not File)" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
-                <Button Content="Add mark to box" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
-                <Button Content="Add mark to box and file" Padding="10" DockPanel.Dock="Top" Margin="0,5" />
+            <DockPanel DockPanel.Dock="Right" LastChildFill="False" Width="170" Margin="10,0,0,0">
+                
+                <Button Content="Clear Log Box (Not File)" Height="40" DockPanel.Dock="Top" Margin="0,5" />
+                
+                <Button Content="Add mark to box" Height="40" DockPanel.Dock="Top" Margin="0,5" />
+                
+                <Button Content="Add mark to box and file" Height="40" DockPanel.Dock="Top" Margin="0,5" />
+                
+                <Button Content="Help" Height="40" DockPanel.Dock="Top" Margin="0,5" />
+                
             </DockPanel>
             
             <DockPanel DockPanel.Dock="Left" LastChildFill="True">
@@ -74,6 +81,58 @@
         </DockPanel>
         
         <DockPanel Grid.Row="2" Grid.Column="1" Dock="Left">
+            
+            <DockPanel Dock="Top" Margin="0,5">
+                
+                <TextBlock Text="Send to Serial Port:" DockPanel.Dock="Top" />
+                
+                <Button Content="Send" 
+                        DockPanel.Dock="Right" 
+                        Width="60"
+                        Height="23"
+                        Margin="10, 0, 0, 0" />
+                
+                <Border BorderBrush="LightGray"
+                        BorderThickness="1"
+                        DockPanel.Dock="Right"
+                        Margin="10,0,0,0">
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Clear" 
+                                DockPanel.Dock="Right" 
+                                Width="60"
+                                Height="23"
+                                Margin="3, 3, 3, 3" />
+                        
+                        <CheckBox Content="Confirm" 
+                                  DockPanel.Dock="Right" 
+                                  VerticalAlignment="Center"
+                                  Margin="10, 3, 5, 3" />
+                    </StackPanel>
+                </Border>
+                
+                
+                <Border BorderBrush="LightGray"
+                        BorderThickness="1"
+                        DockPanel.Dock="Right"
+                        Margin="10,0,0,0">
+                    
+                    <DockPanel Dock="Right" VerticalAlignment="Center" Margin="4">
+                        
+                        
+                        <CheckBox Content="ASCII" Margin="0, 0, 15, 0"/>
+                        <TextBlock Text="CSVs: (" Margin="0,0,10,0" />
+                        <CheckBox Content="DEC" Margin="0, 0, 10, 0"/>
+                        <CheckBox Content="HEX )" />
+                        
+                    </DockPanel>
+                </Border>
+                
+                <DockPanel Dock="Left">
+                    <TextBox Text="{Binding TextSendToSerial }" />
+                </DockPanel>
+
+            </DockPanel>
             
             <DockPanel Dock="Top" Margin="0,5">
                 
@@ -92,7 +151,7 @@
                         Margin="10, 0, 0, 0" />
 
                 <DockPanel Dock="Left">
-                    <TextBox Text="{Binding LogFilenameOptionalAppend}" />
+                    <TextBox Text="{Binding PathToSaveLogsIn }" />
                 </DockPanel>
 
             </DockPanel>
@@ -130,12 +189,12 @@
             </DockPanel>
         </DockPanel>
         
-        <UniformGrid Grid.Row="3" Grid.Column="1" Margin="5" Rows="1" Columns="6">
+        <UniformGrid Grid.Row="3" Grid.Column="1" Margin="5" Rows="1" Columns="8">
             <DockPanel Dock="Left">
                 <TextBlock Text="COM Port:" DockPanel.Dock="Top"/>
                 <ComboBox DockPanel.Dock="Left" 
                           ItemsSource="{Binding ComPorts}" 
-                          SelectedItem="{Binding SelectedComPort}"
+                          SelectedItem="{Binding SelectedComPort, Mode=TwoWay}"
                           IsEnabled="{Binding ComPortSettingsControlsEnabled}">
                     
                 </ComboBox>
@@ -145,7 +204,7 @@
                 <TextBlock Text="Baud Rate:" DockPanel.Dock="Top"/>
                 <ComboBox DockPanel.Dock="Left" 
                           ItemsSource="{Binding BaudRates}" 
-                          SelectedItem="{Binding SelectedBaud}"
+                          SelectedItem="{Binding SelectedBaud, Mode=TwoWay}"
                           IsEnabled="{Binding ComPortSettingsControlsEnabled}">
                 
                 </ComboBox>
@@ -155,7 +214,7 @@
                 <TextBlock Text="Parity:" DockPanel.Dock="Top"/>
                 <ComboBox DockPanel.Dock="Left" 
                           ItemsSource="{Binding ParityOptions}" 
-                          SelectedItem="{Binding SelectedParity}"
+                          SelectedItem="{Binding SelectedParity, Mode=TwoWay}"
                           IsEnabled="{Binding ComPortSettingsControlsEnabled}">
                     
                 </ComboBox>
@@ -164,7 +223,8 @@
             <DockPanel Dock="Left" Margin="10,0,0,0">
                 <TextBlock Text="Data Bit:" DockPanel.Dock="Top"/>
                 <ComboBox DockPanel.Dock="Left" 
-                          ItemsSource="{Binding DataBitOptions}" 
+                          ItemsSource="{Binding DataBitOptions}"
+                          SelectedItem="{Binding SelectedDataBits, Mode=TwoWay}"
                           IsEnabled="{Binding ComPortSettingsControlsEnabled}">
                     
                 </ComboBox>
@@ -174,17 +234,80 @@
                 <TextBlock Text="Stop Bit:" DockPanel.Dock="Top"/>
                 <ComboBox DockPanel.Dock="Left" 
                           ItemsSource="{Binding StopBitOptions}" 
-                          SelectedItem="{Binding SelectedStopBit}"
+                          SelectedItem="{Binding SelectedStopBits, Mode=TwoWay}"
                           IsEnabled="{Binding ComPortSettingsControlsEnabled}">
                     
                 </ComboBox>
             </DockPanel>
             
+            <Button Content="Load Defaults"
+                    Command="{Binding LoadDefaultPortSettingsCommand}"
+                    Background="#111122"
+                    Foreground="#EEEEEE"
+                    Margin="10,15,0,0"/>
+            
             <Button Content="Start New Log File"
                     Command="{Binding StartNewLogFileCommand}"
+                    Background="#051505"
+                    Foreground="#EEEEEE"
+                    Margin="10,15,0,0"/>
+            
+            <Button Content="Stop Logging To File"
+                    Command="{Binding StopLoggingCommand}"
+                    Background="#150505"
+                    Foreground="#EEEEEE"
                     Margin="10,15,0,0"/>
             
         </UniformGrid>
 
+        <StackPanel Grid.Row="1" Grid.Column="2" DockPanel.Dock="Right" Width="170" Margin="10,0,0,0">
+            
+            <TextBlock Text="Log bytes as: " DockPanel.Dock="Top" />
+                
+                <Border BorderBrush="LightGray"
+                        BorderThickness="1"
+                        DockPanel.Dock="Top" 
+                        Padding="3">
+                        
+                    <UniformGrid Rows="2" Columns="3">
+                        <CheckBox Content="ASCII" />
+                        <CheckBox Content="HEX" />
+                        <CheckBox Content="DEC" />
+                        <CheckBox Content="Space" Margin="0,3,0,0"/>
+                        <CheckBox Content="CSVs" Margin="0,3,0,0"/>
+                    </UniformGrid>
+                </Border>
+                
+                <TextBlock Text="Line ending: " DockPanel.Dock="Top" Margin="0,10,0,0"/>
+                
+                <Border BorderBrush="LightGray"
+                        BorderThickness="1"
+                        DockPanel.Dock="Right" 
+                        Padding="4"
+                        >
+                        
+                    <UniformGrid Rows="2" Columns="3">
+                        <CheckBox Content="\n" />
+                        <CheckBox Content="\r" />
+                        <CheckBox Content="\r\n" />
+                        
+                        <StackPanel Margin="0,0,3,0">
+                            <CheckBox Content="HEX:" />
+                            <TextBox />
+                        </StackPanel>
+                        
+                        <StackPanel Margin="0,0,3,0">
+                            <CheckBox Content="DEC:" />
+                            <TextBox />
+                        </StackPanel>
+                        
+                        <StackPanel Margin="0,0,0,0">
+                            <CheckBox Content="Millis:" />
+                            <TextBox />
+                        </StackPanel>
+                    </UniformGrid>
+                </Border>
+            </StackPanel>
+        
     </Grid>
 </Window>

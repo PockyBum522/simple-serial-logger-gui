@@ -11,6 +11,7 @@ using Serilog.Core;
 using SimpleSerialLoggerGui.Core;
 using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.Application;
+using SimpleSerialLoggerGui.Core.Logic.SerialLoggerHelper;
 using SimpleSerialLoggerGui.UI.Interfaces;
 using SimpleSerialLoggerGui.UI.TrayIcon;
 using SimpleSerialLoggerGui.UI.WindowResources.MainWindow;
@@ -28,7 +29,6 @@ public class DiContainerBuilder
     private readonly ContainerBuilder _builder = new ();
     private ILogger? _logger;
     private ISettingsApplicationLocal? _settingsApplicationLocal;
-    private ILogger? _serialLogger;
 
     //private ISettingsApplicationLocal _settingsApplicationLocal;
 
@@ -104,6 +104,10 @@ public class DiContainerBuilder
     private void RegisterMainDependencies()
     {
         _builder.RegisterType<ExceptionHandler>().AsSelf().SingleInstance();
+        
+        _builder.RegisterType<SerialLogger>().AsSelf().SingleInstance();
+        _builder.RegisterType<SerialPortSettingsValidator>().AsSelf().SingleInstance();
+        _builder.RegisterType<SerialPortHelpers>().AsSelf().SingleInstance();
     }
     
     [SupportedOSPlatform("Windows7.0")]

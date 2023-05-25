@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Ports;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Serilog;
 using SimpleSerialLoggerGui.Core.Models;
@@ -28,7 +29,7 @@ public class SerialLogger
         _logger = logger;
         _serialPortSettingsValidator = serialPortSettingsValidator;
     }
-    
+
     /// <summary>
     /// Opens a com port and prepares for reading data from it
     /// </summary>
@@ -66,7 +67,7 @@ public class SerialLogger
         // Any new data from serial port gets logged
         if (_currentSerialPort is null)
             throw new NullReferenceException();
-        
+
         _currentSerialPort.DataReceived += SerialPortDataReceived;
     }
 
@@ -76,9 +77,43 @@ public class SerialLogger
 
         if (_currentSerialPort is null) return;
 
-        var incomingData = _currentSerialPort.ReadLine();
+        var bytesToRead = _currentSerialPort.BytesToRead;
         
-        _serialSerilogLogger.Information( "{IncomingData}", incomingData);
+        // Read lines while we still have available data
+        while (bytesToRead > 0)
+        {
+            var incomingDataBuffer = new char[1000];
+            var currentBufferPosition = 0;
+            
+            // Read until ending char found or we run out of available data
+            while (bytesToRead > 0)
+            {
+                _currentSerialPort.Read(incomingDataBuffer, currentBufferPosition, 1);
+                currentBufferPosition++;
+
+                // Check for line ending char(s)
+                if (incomingDataBuffer.Contains('\n'))
+                {
+                    incomingDataBuffer[currentBufferPosition] = '\0';
+                    break;
+                }
+
+                bytesToRead = _currentSerialPort.BytesToRead;
+            }
+
+            var bufferString = "";
+
+            foreach (var data in incomingDataBuffer)
+            {
+                if (data != '\0')
+                    bufferString += data;
+            }
+
+            if (incomingDataBuffer[0] != new char())
+                _serialSerilogLogger.Information("{IncomingData}", bufferString);
+        }
+        
+        bytesToRead = _currentSerialPort.BytesToRead;
     }
 
     private Parity ConvertParityToEnum(string parityOption)
