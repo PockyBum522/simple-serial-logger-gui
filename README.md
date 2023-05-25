@@ -8,13 +8,19 @@ WPF and .NET 7+ Simple serial port log to file
 * Opening serial port with dropdown options
 * Dropdown options populated from settings (See example configuration info below)
 * Logging to a file (Read in realtime with VSCode)
-* Logging displays in "Serial log" textbox
-* Logging as: ASCII, Hex, Decimal
+* Display incoming serial data in "Serial log" textbox
+
+* Logging as: 
+  * ASCII
+  * Hex
+  * Decimal
+  
 * Logging with: Spaces as separator, commas as separator, both, none
 * Logging newline characters or not
 
-* Newline detection: On '\n'
-* Newline detection: On custom decimal value
+* Newline detection:
+  * On '\n'
+  * On custom decimal value
 
 # What doesn't work
 
