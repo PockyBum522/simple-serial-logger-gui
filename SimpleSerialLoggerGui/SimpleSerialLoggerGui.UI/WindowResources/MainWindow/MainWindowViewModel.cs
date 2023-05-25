@@ -45,6 +45,12 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _isCheckedLogWithSpaces;
     [ObservableProperty] private bool _isCheckedLogWithCommas;
     [ObservableProperty] private bool _isCheckedLogNewlineCharacters;
+    
+    [ObservableProperty] private bool _isCheckedLineEndingDetectionOnNewLine;
+    [ObservableProperty] private bool _isCheckedLineEndingDetectionOnHexValue;
+    [ObservableProperty] private bool _isCheckedLineEndingDetectionOnDecimalValue;
+    [ObservableProperty] private string _hexValueForLineEndingDetection;
+    [ObservableProperty] private string _decimalValueForLineEndingDetection;
 
     [ObservableProperty] private bool _comPortSettingsControlsEnabled = true;
     
@@ -122,21 +128,12 @@ public partial class MainWindowViewModel : ObservableObject
             MessageBox.Show("Please pick a serial port");
             return;
         }
-
-        var displayType = LogDataDisplayType.Uninitialized;
-
-        if (IsCheckedLogAsAscii)
-            displayType = LogDataDisplayType.Ascii;
-
-        if (IsCheckedLogAsHex)
-            displayType = LogDataDisplayType.Hex;
-
-        if (IsCheckedLogAsDecimal)
-            displayType = LogDataDisplayType.Decimal;
         
         var logFormatSettings = new LogFormatting()
         {
-            LogAsDisplayType = displayType,
+            LogAsDisplayType = SetLogDataDisplayTypeFromUi(),
+            LineEndingDetectionType = SetLogDataLineEndingDetectionTypeFromUi(),
+            LineEndingDetectionValue = SetLineEndingValueFromUi(),
             LogWithCommas = IsCheckedLogWithCommas,
             LogWithSpaces = IsCheckedLogWithSpaces,
             LogWithNewlineCharacters = IsCheckedLogNewlineCharacters
@@ -164,9 +161,58 @@ public partial class MainWindowViewModel : ObservableObject
 
         // Update CurrentLogFilename
 
+    }
 
+    private string SetLineEndingValueFromUi()
+    {
+        if (IsCheckedLineEndingDetectionOnNewLine)
+        {
+            var returnString = "";
+            returnString += '\n';
+            return returnString;
+        }
+
+        if (IsCheckedLineEndingDetectionOnHexValue)
+            throw new NotImplementedException();
+        
+        if (IsCheckedLineEndingDetectionOnDecimalValue)
+            return DecimalValueForLineEndingDetection;
+
+        return "";
+    }
+
+    private LogDataDisplayType SetLogDataDisplayTypeFromUi()
+    {
+        var displayType = LogDataDisplayType.Uninitialized;
+        
+        if (IsCheckedLogAsAscii)
+            displayType = LogDataDisplayType.Ascii;
+
+        if (IsCheckedLogAsHex)
+            displayType = LogDataDisplayType.Hex;
+
+        if (IsCheckedLogAsDecimal)
+            displayType = LogDataDisplayType.Decimal;
+        
+        return displayType;
     }
     
+    private LogDataLineEndingDetectionType SetLogDataLineEndingDetectionTypeFromUi()
+    {
+        var lineEndingDetectionType = LogDataLineEndingDetectionType.Uninitialized;
+
+        if (IsCheckedLineEndingDetectionOnNewLine)
+            lineEndingDetectionType = LogDataLineEndingDetectionType.Newline;
+
+        if (IsCheckedLineEndingDetectionOnHexValue)
+            lineEndingDetectionType = LogDataLineEndingDetectionType.HexValue;
+
+        if (IsCheckedLineEndingDetectionOnDecimalValue)
+            lineEndingDetectionType = LogDataLineEndingDetectionType.DecimalValue;
+
+        return lineEndingDetectionType;
+    }
+
     [RelayCommand]
     private void StopLogging()
     {

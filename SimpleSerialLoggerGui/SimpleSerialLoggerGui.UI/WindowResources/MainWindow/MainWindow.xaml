@@ -306,18 +306,18 @@
                         >
                         
                     <UniformGrid Rows="2" Columns="3">
-                        <CheckBox Content="\n" />
+                        <CheckBox Content="\n" IsChecked="{Binding IsCheckedLineEndingDetectionOnNewLine}" />
                         <CheckBox Content="\r" />
                         <CheckBox Content="\r\n" />
                         
                         <StackPanel Margin="0,0,3,0">
-                            <CheckBox Content="HEX:" />
-                            <TextBox />
+                            <CheckBox Content="HEX:" IsChecked="{Binding IsCheckedLineEndingDetectionOnHexValue}" />
+                            <TextBox Text="{Binding HexValueForLineEndingDetection}" />
                         </StackPanel>
                         
                         <StackPanel Margin="0,0,3,0">
-                            <CheckBox Content="DEC:" />
-                            <TextBox />
+                            <CheckBox Content="DEC:"  IsChecked="{Binding IsCheckedLineEndingDetectionOnDecimalValue}" />
+                            <TextBox Text="{Binding DecimalValueForLineEndingDetection}" />
                         </StackPanel>
                         
                         <StackPanel Margin="0,0,0,0">

@@ -117,16 +117,22 @@ public class SerialLogger
             currentBufferPosition++;
 
             // Check for line ending char(s)
-            if (incomingDataBuffer.Contains('\n'))
+            if (_currentLogFormatting?.LineEndingDetectionType == LogDataLineEndingDetectionType.Newline &&
+                incomingDataBuffer.Contains('\n'))
             {
-                incomingDataBuffer[currentBufferPosition] = '\0';
-                break;
+                break;    
+            }
+            
+            if (_currentLogFormatting?.LineEndingDetectionType == LogDataLineEndingDetectionType.DecimalValue &&
+                incomingDataBuffer.Contains((char)int.Parse(_currentLogFormatting.LineEndingDetectionValue)))
+            {
+                break;    
             }
 
             bytesToRead = _currentSerialPort.BytesToRead;
         }
 
-        var bufferString = CreateLogLineOutputPerLogFormatting(incomingDataBuffer);
+        var bufferString = CreateLogLineOutputPerLogFormatting(incomingDataBuffer, currentBufferPosition);
 
         if (incomingDataBuffer[0] != new char())
             _serialSerilogLogger.Information("{IncomingData}", bufferString);
@@ -134,20 +140,37 @@ public class SerialLogger
         return bytesToRead;
     }
 
-    private string CreateLogLineOutputPerLogFormatting(char[] incomingDataBuffer)
+    private string CreateLogLineOutputPerLogFormatting(char[] incomingDataBuffer, int currentBufferPosition)
     {
         if (_currentLogFormatting is null) throw new NullReferenceException();
 
         var bufferString = "";
 
-        foreach (var data in incomingDataBuffer)
+        for (var i = 0; i < currentBufferPosition; i++)
         {
-            if (data == '\0') break;
-
-            if (!_currentLogFormatting.LogWithNewlineCharacters && data == '\r') break; 
-            if (!_currentLogFormatting.LogWithNewlineCharacters && data == '\n') break; 
+            if (_currentLogFormatting.LineEndingDetectionType == LogDataLineEndingDetectionType.Newline)
+            {
+                if (incomingDataBuffer[i] == '\n') break;
+            }
             
-            bufferString += GetNextFormattedSection(data);
+            if (_currentLogFormatting.LineEndingDetectionType == LogDataLineEndingDetectionType.DecimalValue)
+            {
+                if (incomingDataBuffer[i] == int.Parse(_currentLogFormatting.LineEndingDetectionValue))
+                {
+                    bufferString += GetNextFormattedSection(incomingDataBuffer[i]); // have to add it if it's not a newline
+                    
+                    break;
+                }
+            }
+
+            if (_currentLogFormatting.LogAsDisplayType == LogDataDisplayType.Ascii &&
+                !_currentLogFormatting.LogWithNewlineCharacters)
+            {
+                if (!_currentLogFormatting.LogWithNewlineCharacters && incomingDataBuffer[i] == '\r') break; 
+                if (!_currentLogFormatting.LogWithNewlineCharacters && incomingDataBuffer[i] == '\n') break;    
+            }
+
+            bufferString += GetNextFormattedSection(incomingDataBuffer[i]);
         }
         
         bufferString = bufferString.TrimEnd();
