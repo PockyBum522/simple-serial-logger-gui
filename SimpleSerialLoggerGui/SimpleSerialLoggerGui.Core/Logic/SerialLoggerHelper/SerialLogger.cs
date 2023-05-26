@@ -44,12 +44,22 @@ public class SerialLogger
     {
         _currentLogFormatting = logFormatSettings;
         _currentSerialPort = currentSerialPort;
+
+        var logFilename = Path.GetFileName(fullPathToLogfile);
+        var logDirectory = Path.GetDirectoryName(fullPathToLogfile);
+
+        var fileSafeTimestamp = DateTimeOffset.Now.ToString("s").Replace(":", "_");
+
+        var guidString = Guid.NewGuid().ToString();
+        var shortUid = guidString.Substring(2, 6);
+        
+        var finalLogPath = Path.Join(logDirectory, $"SES_START_{fileSafeTimestamp}_{shortUid}", logFilename);
         
         // Make new logger/logfile
         _serialSerilogLogger = new LoggerConfiguration()
             .Enrich.WithProperty("SerialLogger", "SerialLoggerContext")
             .MinimumLevel.Debug()
-            .WriteTo.File(fullPathToLogfile, rollingInterval: RollingInterval.Day)
+            .WriteTo.File(finalLogPath, rollingInterval: RollingInterval.Day)
             .WriteTo.Console()
             .WriteTo.Debug()
             .CreateLogger();
