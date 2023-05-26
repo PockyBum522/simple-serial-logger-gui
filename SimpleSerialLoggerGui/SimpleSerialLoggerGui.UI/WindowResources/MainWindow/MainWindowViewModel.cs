@@ -51,6 +51,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private bool _isCheckedLineEndingDetectionOnDecimalValue;
     [ObservableProperty] private string _hexValueForLineEndingDetection = "";
     [ObservableProperty] private string _decimalValueForLineEndingDetection = "";
+    
+    [ObservableProperty] private string _sendToSerialData = "";
 
     [ObservableProperty] private bool _comPortSettingsControlsEnabled = true;
     
@@ -139,20 +141,36 @@ public partial class MainWindowViewModel : ObservableObject
         };
         
         // Open com port with user selected settings
-        _serialLogger.OpenComPort(serialSettings, logFormatSettings);
+        _serialPortHelpers.OpenComPort(serialSettings);
         
         // Disable com port controls from changes allowed
         ComPortSettingsControlsEnabled = false;
 
         // If successful, start logging with BuiltLogFilename
-        _serialLogger.StartLogging(
+        _serialPortHelpers.StartLogging(
             Path.Join(PathToSaveLogsIn,
-                      "serial_data_.log"));
+                      "serial_data_.log"),
+            logFormatSettings);
 
         // Update CurrentLogFilename
 
     }
 
+    [RelayCommand]
+    private void SendDataToSerial()
+    {
+        var serialSettings = new SerialPortSettings()
+        {
+            BaudRate = int.Parse(SelectedBaud),
+            ComPortName = SelectedComPort,
+            DataBits = int.Parse(SelectedDataBits),
+            StopBits = SelectedStopBits,
+            ParityOption = SelectedParity
+        };
+        
+        _serialPortHelpers.WriteToSerial(serialSettings, SendToSerialData);
+    }
+    
     private void WarnUserIfAnySettingsInvalid()
     {
         if (string.IsNullOrWhiteSpace(PathToSaveLogsIn))
@@ -300,7 +318,7 @@ public partial class MainWindowViewModel : ObservableObject
     private void StopLogging()
     {
         // Close com port with user selected settings
-        _serialLogger.CloseComPort();
+        _serialPortHelpers.CloseComPort();
         
         // Allow com port controls to be changed by user once more
         ComPortSettingsControlsEnabled = true;

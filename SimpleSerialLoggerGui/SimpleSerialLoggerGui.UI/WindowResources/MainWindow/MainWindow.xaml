@@ -89,6 +89,7 @@
                 <TextBlock Text="Send to Serial Port:" DockPanel.Dock="Top" />
                 
                 <Button Content="Send" 
+                        Command="{Binding SendDataToSerialCommand}"
                         DockPanel.Dock="Right" 
                         Width="60"
                         Height="23"
