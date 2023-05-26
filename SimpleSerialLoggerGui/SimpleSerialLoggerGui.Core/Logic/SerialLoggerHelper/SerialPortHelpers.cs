@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows;
 using Serilog;
 using SimpleSerialLoggerGui.Core.Models;
@@ -21,7 +22,8 @@ public class SerialPortHelpers
     private LogFormatting? _currentLogFormatting;
     
     private DateTimeOffset _lastWarningTime = DateTimeOffset.MinValue;
-    
+    private UTF8Encoding? _utf8Encoding;
+
     /// <summary>
     /// Constructor for dependency injection
     /// </summary>
@@ -52,7 +54,11 @@ public class SerialPortHelpers
                 ConvertParityToEnum(serialPortSettings.ParityOption),
                 serialPortSettings.DataBits,
                 ConvertStopBitsToEnum(serialPortSettings.StopBits));
+                
+            _utf8Encoding ??= new UTF8Encoding();
 
+            _currentSerialPort.Encoding = _utf8Encoding;
+            
             _currentSerialPort.Open();    
         }
         else
@@ -95,7 +101,7 @@ public class SerialPortHelpers
         _logger.Debug("Writing byte to {PortName}: {ByteToSend}", _currentSerialPort.PortName, splitBytes);
 
         var serialSendBuffer = ConvertBytesStringsToByteArray(splitBytes);
-
+        
         _currentSerialPort.Write(serialSendBuffer, 0, splitBytes.Length);
     }
 
