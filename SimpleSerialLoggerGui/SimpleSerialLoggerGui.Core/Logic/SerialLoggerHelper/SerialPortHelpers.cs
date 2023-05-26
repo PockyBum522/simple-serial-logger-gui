@@ -42,15 +42,23 @@ public class SerialPortHelpers
     public void OpenComPort(SerialPortSettings serialPortSettings)
     {
         if (!_serialPortSettingsValidator.ComSettingsValid(serialPortSettings)) throw new ArgumentException();
+        
+        if (_currentSerialPort is null ||
+            !_currentSerialPort.IsOpen)
+        {
+            _currentSerialPort = new SerialPort(
+                serialPortSettings.ComPortName,
+                serialPortSettings.BaudRate,
+                ConvertParityToEnum(serialPortSettings.ParityOption),
+                serialPortSettings.DataBits,
+                ConvertStopBitsToEnum(serialPortSettings.StopBits));
 
-        _currentSerialPort = new SerialPort(
-            serialPortSettings.ComPortName,
-            serialPortSettings.BaudRate,
-            ConvertParityToEnum(serialPortSettings.ParityOption),
-            serialPortSettings.DataBits,
-            ConvertStopBitsToEnum(serialPortSettings.StopBits));
-
-        _currentSerialPort.Open();
+            _currentSerialPort.Open();    
+        }
+        else
+        {
+            MessageBox.Show("Port already open. Was already logging.");
+        }
     }    
     
     /// <summary>

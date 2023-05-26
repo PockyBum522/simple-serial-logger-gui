@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -61,6 +62,21 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<string> _parityOptions = new();
     [ObservableProperty] private ObservableCollection<string> _dataBitOptions = new();
     [ObservableProperty] private ObservableCollection<string> _stopBitOptions = new();
+
+    [ObservableProperty] private Brush _stopLoggingButtonBackgroundColor;
+    [ObservableProperty] private Brush _stopLoggingButtonForegroundColor;
+    
+    [ObservableProperty] private Brush _startLoggingButtonBackgroundColor;
+    [ObservableProperty] private Brush _startLoggingButtonForegroundColor;
+
+    // Button colors to notify user what current mode is
+    private Brush DarkRed => new SolidColorBrush(Color.FromArgb(255, 25, 10, 10));
+    private Brush LightRed => new SolidColorBrush(Color.FromArgb(255, 135, 10, 10));
+    private Brush DarkGreen => new SolidColorBrush(Color.FromArgb(255, 10, 25, 10));
+    private Brush LightGreen => new SolidColorBrush(Color.FromArgb(255, 10, 135, 10));
+    private Brush TextDark => new SolidColorBrush(Color.FromArgb(255, 20, 20, 20));
+    private Brush TextLight => new SolidColorBrush(Color.FromArgb(255, 200, 200, 200));
+    
     
     private readonly ILogger _logger;
     private readonly Dispatcher _uiThreadDispatcher;
@@ -153,10 +169,15 @@ public partial class MainWindowViewModel : ObservableObject
             Path.Join(PathToSaveLogsIn,
                       "serial_data_.log"),
             logFormatSettings);
-
-        // Update CurrentLogFilename
-
-    }
+        
+        StopLoggingButtonBackgroundColor = DarkRed;
+        StopLoggingButtonForegroundColor = TextLight;
+        
+        StartLoggingButtonBackgroundColor = LightGreen;
+        StartLoggingButtonForegroundColor = TextDark; 
+        
+        // TODO: Update CurrentLogFilename
+    } 
 
     [RelayCommand]
     private void RescanSystemComPorts()
@@ -338,6 +359,12 @@ public partial class MainWindowViewModel : ObservableObject
         
         // Allow com port controls to be changed by user once more
         ComPortSettingsControlsEnabled = true;
+
+        StopLoggingButtonBackgroundColor = LightRed;
+        StopLoggingButtonForegroundColor = TextDark;
+        
+        StartLoggingButtonBackgroundColor = DarkGreen;
+        StartLoggingButtonForegroundColor = TextLight;
     }
     
     [RelayCommand]
@@ -437,6 +464,12 @@ public partial class MainWindowViewModel : ObservableObject
         
         SelectedComPort = _serialPortHelpers.GetFirstSerialPortOnSystem();
 
+        StopLoggingButtonBackgroundColor = LightRed;
+        StopLoggingButtonForegroundColor = TextDark; 
+        
+        StartLoggingButtonBackgroundColor = DarkGreen;
+        StartLoggingButtonForegroundColor = TextLight; 
+        
         // This looks fine for a default option, these will momentarily
         // be overwritten by the code that loads settings from configuration
         IsCheckedLogAsAscii = true;

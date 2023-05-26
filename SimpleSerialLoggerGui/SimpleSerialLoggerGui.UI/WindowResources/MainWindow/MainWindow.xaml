@@ -254,14 +254,14 @@
             
             <Button Content="Start New Log File"
                     Command="{Binding StartNewLogFileCommand}"
-                    Background="#051505"
-                    Foreground="#EEEEEE"
+                    Background="{Binding StartLoggingButtonBackgroundColor}"
+                    Foreground="{Binding StartLoggingButtonForegroundColor}"
                     Margin="10,15,0,0"/>
             
             <Button Content="Stop Logging To File"
                     Command="{Binding StopLoggingCommand}"
-                    Background="#150505"
-                    Foreground="#EEEEEE"
+                    Background="{Binding StopLoggingButtonBackgroundColor, Mode=TwoWay}"
+                    Foreground="{Binding StopLoggingButtonForegroundColor}"
                     Margin="10,15,0,0"/>
             
         </UniformGrid>
