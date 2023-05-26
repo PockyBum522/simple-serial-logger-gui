@@ -53,7 +53,10 @@ public class SerialLogger
         var guidString = Guid.NewGuid().ToString();
         var shortUid = guidString.Substring(2, 6);
         
-        var finalLogPath = Path.Join(logDirectory, $"SES_START_{fileSafeTimestamp}_{shortUid}", logFilename);
+        var finalLogPath = Path.Join(
+            logDirectory, 
+            $"{currentSerialPort.PortName}_SES_START_{fileSafeTimestamp}_{shortUid}",
+            logFilename);
         
         // Make new logger/logfile
         _serialSerilogLogger = new LoggerConfiguration()
