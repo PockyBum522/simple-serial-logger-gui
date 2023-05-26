@@ -117,8 +117,8 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void StartNewLogFile()
     {
-        WarnUserIfAnySettingsInvalid();
-
+        if (!WarnUserUnlessAllSettingsValid()) return;
+        
         SaveAllUserSettingsToConfiguration();
         
         var logFormatSettings = new LogFormatting()
@@ -171,24 +171,24 @@ public partial class MainWindowViewModel : ObservableObject
         _serialPortHelpers.WriteToSerial(serialSettings, SendToSerialData);
     }
     
-    private void WarnUserIfAnySettingsInvalid()
+    private bool WarnUserUnlessAllSettingsValid()
     {
         if (string.IsNullOrWhiteSpace(PathToSaveLogsIn))
         {
             MessageBox.Show("Log to directory is empty or invalid. Please set a directory to log serial data to and try again.");
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(SelectedComPort))
         {
             MessageBox.Show("Please pick a serial port");
-            return;
+            return false;
         }
         
         if (string.IsNullOrWhiteSpace(SelectedBaud))
         {
             MessageBox.Show("Please pick a baud rate");
-            return;
+            return false;
         }
 
         if (!IsCheckedLogAsAscii &&
@@ -196,7 +196,7 @@ public partial class MainWindowViewModel : ObservableObject
             !IsCheckedLogAsDecimal)
         {
             MessageBox.Show("You must select a value to display logged bytes as");
-            return;
+            return false;
         }
         
         // Line ending detection
@@ -205,22 +205,24 @@ public partial class MainWindowViewModel : ObservableObject
             !IsCheckedLineEndingDetectionOnHexValue)
         {
             MessageBox.Show("You must select a criteria for line endings");
-            return;
+            return false;
         }
         
         if (IsCheckedLineEndingDetectionOnDecimalValue &&
             string.IsNullOrWhiteSpace(DecimalValueForLineEndingDetection))
         {
             MessageBox.Show("You must enter a value to match on for line endings under decimal");
-            return;
+            return false;
         }
         
         if (IsCheckedLineEndingDetectionOnHexValue &&
             string.IsNullOrWhiteSpace(HexValueForLineEndingDetection))
         {
             MessageBox.Show("You must enter a value to match on for line endings under hex");
-            return;
+            return false;
         }
+
+        return true;
     }
 
     private void SaveAllUserSettingsToConfiguration()
