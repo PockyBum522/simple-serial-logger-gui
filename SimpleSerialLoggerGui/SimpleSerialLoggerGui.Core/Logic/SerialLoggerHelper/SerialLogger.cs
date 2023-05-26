@@ -62,7 +62,7 @@ public class SerialLogger
         _serialSerilogLogger = new LoggerConfiguration()
             .Enrich.WithProperty("SerialLogger", "SerialLoggerContext")
             .MinimumLevel.Debug()
-            .WriteTo.File(finalLogPath, rollingInterval: RollingInterval.Day)
+            .WriteTo.File(finalLogPath, rollingInterval: RollingInterval.Day, shared: true)
             .WriteTo.Console()
             .WriteTo.Debug()
             .CreateLogger();
