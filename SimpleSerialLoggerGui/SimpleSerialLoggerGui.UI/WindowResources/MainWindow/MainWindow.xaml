@@ -142,6 +142,7 @@
                 <TextBlock Text="Directory to save logs to:" DockPanel.Dock="Top" />
                 
                 <Button Content="Open" 
+                        Command="{Binding OpenLogsFolderInFileExplorerCommand}"
                         DockPanel.Dock="Right" 
                         Width="60"
                         Height="23"
