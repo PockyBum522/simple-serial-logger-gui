@@ -157,6 +157,18 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void RescanSystemComPorts()
+    {
+        ComPorts.Clear();
+        
+        // Get all port names on system
+        foreach (var portNames in _serialPortHelpers.GetAllSerialPortsOnSystem())
+        {
+            ComPorts.Add(portNames.Trim());
+        }
+    }
+
+    [RelayCommand]
     private void SendDataToSerial()
     {
         var serialSettings = new SerialPortSettings()
@@ -345,12 +357,6 @@ public partial class MainWindowViewModel : ObservableObject
  
     private void LoadStoredSettingsIntoWindow()
     {
-        // Get all port names on system
-        foreach (var portNames in _serialPortHelpers.GetAllSerialPortsOnSystem())
-        {
-            ComPorts.Add(portNames.Trim());
-        }
-        
         // Load all options in settings .ini for each of the dropdown menus
         LoadCommaSeparatedOptions(BaudRates, _settingsApplicationLocal.SerialPossibleOptionsSettings.BaudRates);
         LoadCommaSeparatedOptions(ParityOptions, _settingsApplicationLocal.SerialPossibleOptionsSettings.ParityOptions);
@@ -425,9 +431,12 @@ public partial class MainWindowViewModel : ObservableObject
     
     private void InitializeNecessaryControls()
     {
+        RescanSystemComPorts();
+        
         SelectedComPort = _serialPortHelpers.GetFirstSerialPortOnSystem();
 
-        // This looks fine for a default option
+        // This looks fine for a default option, these will momentarily
+        // be overwritten by the code that loads settings from configuration
         IsCheckedLogAsAscii = true;
 
         IsCheckedLineEndingDetectionOnNewLine = true;

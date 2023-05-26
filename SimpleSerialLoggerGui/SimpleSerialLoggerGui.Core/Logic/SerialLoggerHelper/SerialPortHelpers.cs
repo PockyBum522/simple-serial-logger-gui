@@ -160,9 +160,18 @@ public class SerialPortHelpers
     /// </summary>
     public string GetFirstSerialPortOnSystem()
     {
-        var availablePorts = GetAllSerialPortsOnSystem();
+        try
+        {
+            var availablePorts = GetAllSerialPortsOnSystem();
 
-        return availablePorts[0];
+            return availablePorts[0];
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // No serial ports found on the system
+            return "None";
+        }
+
     }
     
     /// <summary>
@@ -195,6 +204,11 @@ public class SerialPortHelpers
         var portsAsList = SerialPort.GetPortNames().ToList();
 
         portsAsList.Sort();
+
+        if (portsAsList.Count < 1)
+        {
+            return new List<string>(){"None"};
+        }
 
         return portsAsList;
     }

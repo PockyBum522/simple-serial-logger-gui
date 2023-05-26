@@ -195,12 +195,15 @@
         <UniformGrid Grid.Row="3" Grid.Column="1" Margin="5" Rows="1" Columns="8">
             <DockPanel Dock="Left">
                 <TextBlock Text="COM Port:" DockPanel.Dock="Top"/>
+                
+                <!-- Rescan for new ports on system -->
+                <Button Content="🔃" Command="{Binding RescanSystemComPortsCommand}" DockPanel.Dock="Right" Width="22" Margin="3, 0,0,0"/>
+                
                 <ComboBox DockPanel.Dock="Left" 
                           ItemsSource="{Binding ComPorts}" 
                           SelectedItem="{Binding SelectedComPort, Mode=TwoWay}"
-                          IsEnabled="{Binding ComPortSettingsControlsEnabled}">
-                    
-                </ComboBox>
+                          IsEnabled="{Binding ComPortSettingsControlsEnabled}" />
+                
             </DockPanel>
 
             <DockPanel Dock="Left" Margin="10,0,0,0">
