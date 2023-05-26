@@ -33,8 +33,8 @@ WPF and .NET 7+ Simple serial port log to file
 ```
 [SerialSelectionSettings]
 LastComPort=COM1
-LastBaud=115200
-LastParity=None
+LastBaud=9700
+LastParity=Even
 LastDataBits=8
 LastStopBits=1
 
@@ -43,11 +43,33 @@ LastDirectory=D:\Dropbox\Documents\Desktop\Serial Logs
 
 [SerialPossibleOptionsSettings]
 StopBits=0, 1, 1.5, 2
-BaudRates=4800, 9600, 19200, 115200
-DataBits=6, 7, 8, 9
+BaudRates=4800, 9600, 9700, 19200, 115200
+DataBits=6, 7, 8
 ParityOptions=None, Even, Odd, Mark, Space
 
 [ApplicationSettings]
 ShowMainWindowOnStartup=true
+
+[SerialPortSettingsSelectionsSelections]
+LastBaud=9700
+LastParity=Mark
+LastDataBits=8
+LastStopBits=1
+LastComPort=COM23
+
+[SerialDataDisplayUserSelections]
+LastDisplayAsAsciiState=false
+LastDisplayAsHexState=false
+LastDisplayAsDecimalState=true
+LastDisplayWithSpacesState=true
+LastDisplayWithCommasState=true
+LastDisplayWithNewlineCharactersState=false
+
+[LineEndingDetectionUserSelections]
+LastDetectNewlinesState=false
+LastDetectHexValueChecked=false
+LastDetectDecimalValueChecked=true
+LastDecimalCustomTextState=250
+LastHexCustomTextState=
 
 ```
