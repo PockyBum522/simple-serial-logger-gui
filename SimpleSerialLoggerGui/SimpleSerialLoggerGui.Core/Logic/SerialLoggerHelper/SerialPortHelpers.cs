@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows;
 using Serilog;
 using SimpleSerialLoggerGui.Core.Models;
 
@@ -72,8 +73,88 @@ public class SerialPortHelpers
             OpenComPort(serialPortSettings);    
         }
         
+        // We're assuming it's DEC for now
+        if (!BytesTextIsValid(sendToSerialData))
+        {
+            MessageBox.Show("You must separate multiple bytes with ',' or ' ' or both.");
+            return;
+        } 
+        
+        var splitBytes = ParseBytesText(sendToSerialData);
+
+        if (_currentSerialPort is null) throw new NullReferenceException();
+        
+        _logger.Debug("Writing byte to {PortName}: {ByteToSend}", _currentSerialPort.PortName, splitBytes);
+
+        var serialSendBuffer = ConvertBytesStringsToByteArray(splitBytes);
+
+        _currentSerialPort.Write(serialSendBuffer, 0, splitBytes.Length);
     }
-    
+
+    private static byte[] ConvertBytesStringsToByteArray(IReadOnlyList<string> splitBytes)
+    {
+        var serialSendBuffer = new byte[splitBytes.Count];
+
+        for (var i = 0; i < splitBytes.Count; i++)
+        {
+            var byteToSend = byte.Parse(splitBytes[i]);
+
+            serialSendBuffer[i] = byteToSend;
+        }
+
+        return serialSendBuffer;
+    }
+
+    private bool BytesTextIsValid(string sendToSerialData)
+    {
+        var hasCommas = sendToSerialData.Contains(',');
+        
+        var hasSpaces = sendToSerialData.Contains(' ');
+
+        if (hasCommas && !hasSpaces)
+            return true;
+        
+        if (!hasCommas && hasSpaces)
+            return true;
+        
+        if (hasCommas && hasSpaces)
+            return true;
+
+        if (!hasCommas && 
+            !hasSpaces &&
+            sendToSerialData.Length <= 3)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private string[] ParseBytesText(string sendToSerialData)
+    {
+        var hasCommas = sendToSerialData.Contains(',');
+        
+        var hasSpaces = sendToSerialData.Contains(' ');
+        
+        if (hasCommas && !hasSpaces)
+            return sendToSerialData.Split(",");
+        
+        if (!hasCommas && hasSpaces)
+            return sendToSerialData.Split(" ");
+        
+        if (hasCommas && hasSpaces)
+            return sendToSerialData.Split(", ");
+
+        if (!hasCommas && 
+            !hasSpaces &&
+            sendToSerialData.Length <= 3)
+        {
+            return new[] { sendToSerialData };
+        }
+
+        throw new ArgumentException("Text supplied to send appears to be multiple bytes but not split on ' ' or ',' or both");
+    }
+
     /// <summary>
     /// Returns the lowest serial port available on the system
     /// </summary>
