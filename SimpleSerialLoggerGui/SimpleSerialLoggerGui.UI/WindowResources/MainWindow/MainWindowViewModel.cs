@@ -95,10 +95,12 @@ public partial class MainWindowViewModel : ObservableObject
 
         while (true)
         {
-            var fileReader = new FileReader();
-            
             await Task.Delay(50);
+
+            if (Directory.GetFiles(PathToSaveLogsIn).Length < 1) continue;
             
+            var fileReader = new FileReader();
+
             var newestLogFilePath = FolderHelpers.GetNewestFileIn(PathToSaveLogsIn, "*.log");
             
             var fileData = fileReader.ReadFileWithoutLocking(newestLogFilePath);
