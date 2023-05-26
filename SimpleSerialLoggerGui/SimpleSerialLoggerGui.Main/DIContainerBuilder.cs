@@ -7,7 +7,6 @@ using Autofac;
 using Config.Net;
 using JetBrains.Annotations;
 using Serilog;
-using Serilog.Core;
 using SimpleSerialLoggerGui.Core;
 using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.Application;

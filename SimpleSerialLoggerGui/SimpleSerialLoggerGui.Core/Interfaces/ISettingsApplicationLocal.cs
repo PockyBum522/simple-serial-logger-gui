@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SimpleSerialLoggerGui.Core.Interfaces;
+﻿namespace SimpleSerialLoggerGui.Core.Interfaces;
 
 /// <summary>
 /// Config.net interface that will be turned into a proxy object for settings pertaining to this application

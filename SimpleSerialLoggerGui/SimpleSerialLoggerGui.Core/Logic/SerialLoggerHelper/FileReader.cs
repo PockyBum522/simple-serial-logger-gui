@@ -15,16 +15,14 @@ public class FileReader
     /// <returns>File contents</returns>
     public string ReadFileWithoutLocking(string filePathToRead)
     {
-        byte[]? oFileBytes;
-
         using var fs = System.IO.File.Open(filePathToRead, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
         
         var numBytesToRead = Convert.ToInt32(fs.Length);
         
-        oFileBytes = new byte[(numBytesToRead)];
+        var fileBytes = new byte[(numBytesToRead)];
         
-        fs.Read(oFileBytes, 0, numBytesToRead);
+        fs.Read(fileBytes, 0, numBytesToRead);
 
-        return Encoding.Default.GetString(oFileBytes);
+        return Encoding.Default.GetString(fileBytes);
     }
 }

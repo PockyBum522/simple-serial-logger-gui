@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using Serilog;
 using Serilog.Core;
@@ -40,23 +38,10 @@ public class SerialLogger
     /// Starts a new serial log to file and passed TextBox 
     /// </summary>
     /// <param name="fullPathToLogfile">Full path to logfile</param>
-    public void StartLoggingBacker(string fullPathToLogfile, LogFormatting logFormatSettings, SerialPort currentSerialPort)
+    public void StartLoggingBacker(string finalLogPath, LogFormatting logFormatSettings, SerialPort currentSerialPort)
     {
         _currentLogFormatting = logFormatSettings;
         _currentSerialPort = currentSerialPort;
-
-        var logFilename = Path.GetFileName(fullPathToLogfile);
-        var logDirectory = Path.GetDirectoryName(fullPathToLogfile);
-
-        var fileSafeTimestamp = DateTimeOffset.Now.ToString("s").Replace(":", "_");
-
-        var guidString = Guid.NewGuid().ToString();
-        var shortUid = guidString.Substring(2, 6);
-        
-        var finalLogPath = Path.Join(
-            logDirectory, 
-            $"{currentSerialPort.PortName}_SES_START_{fileSafeTimestamp}_{shortUid}",
-            logFilename);
         
         // Make new logger/logfile
         _serialSerilogLogger = new LoggerConfiguration()

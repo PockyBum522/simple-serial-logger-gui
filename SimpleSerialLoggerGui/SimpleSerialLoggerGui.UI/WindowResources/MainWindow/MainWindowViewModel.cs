@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -12,7 +11,6 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
-using Serilog.Core;
 using SimpleSerialLoggerGui.Core;
 using SimpleSerialLoggerGui.Core.Interfaces;
 using SimpleSerialLoggerGui.Core.Logic.SerialLoggerHelper;
@@ -55,7 +53,7 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _decimalValueForLineEndingDetection = "";
     
     [ObservableProperty] private string _sendToSerialData = "";
-
+    
     [ObservableProperty] private bool _comPortSettingsControlsEnabled = true;
     
     [ObservableProperty] private ObservableCollection<string> _comPorts = new();
@@ -70,6 +68,8 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private Brush _startLoggingButtonBackgroundColor;
     [ObservableProperty] private Brush _startLoggingButtonForegroundColor;
 
+    private string _sessionLogFolderPath = "";
+    
     // Button colors to notify user what current mode is
     private Brush DarkRed => new SolidColorBrush(Color.FromArgb(255, 25, 10, 10));
     private Brush LightRed => new SolidColorBrush(Color.FromArgb(255, 135, 10, 10));
@@ -84,6 +84,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly SerialLogger _serialLogger;
     private readonly ISettingsApplicationLocal _settingsApplicationLocal;
     private readonly SerialPortHelpers _serialPortHelpers;
+    private string _lastFileData;
 
     /// <summary>
     /// Constructor for dependency injection
@@ -106,31 +107,32 @@ public partial class MainWindowViewModel : ObservableObject
         _serialPortHelpers = serialPortHelpers;
     }
 
-    private async Task UpdateLogTextboxWithFileContents()
+    private Task UpdateLogTextboxWithFileContents()
     {
-        var lastFileData = "";
+        _lastFileData = "";
 
-        while (true)
+        if (string.IsNullOrWhiteSpace(_sessionLogFolderPath)) return Task.CompletedTask;
+        
+        if (!Directory.Exists(_sessionLogFolderPath)) return Task.CompletedTask;
+        
+        if (Directory.GetFiles(_sessionLogFolderPath).Length < 1) return Task.CompletedTask;
+        
+        var fileReader = new FileReader();
+
+        var newestLogFilePath = FolderHelpers.GetNewestFileIn(_sessionLogFolderPath, "*.log");
+        
+        var fileData = fileReader.ReadFileWithoutLocking(newestLogFilePath);
+
+        if (_lastFileData == fileData) return Task.CompletedTask;
+
+        _lastFileData = fileData;
+        
+        _uiThreadDispatcher.Invoke(() =>
         {
-            await Task.Delay(50);
-
-            if (Directory.GetFiles(PathToSaveLogsIn).Length < 1) continue;
-            
-            var fileReader = new FileReader();
-
-            var newestLogFilePath = FolderHelpers.GetNewestFileIn(PathToSaveLogsIn, "*.log");
-            
-            var fileData = fileReader.ReadFileWithoutLocking(newestLogFilePath);
-
-            if (lastFileData == fileData) continue;
-
-            _uiThreadDispatcher.Invoke(() =>
-            {
-                lastFileData = fileData;
-            
-                CurrentSerialLog = fileData;
-            });
-        }
+            CurrentSerialLog = fileData;
+        });
+        
+        return Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -166,10 +168,19 @@ public partial class MainWindowViewModel : ObservableObject
         ComPortSettingsControlsEnabled = false;
 
         // If successful, start logging with BuiltLogFilename
-        _serialPortHelpers.StartLogging(
-            Path.Join(PathToSaveLogsIn,
-                      "serial_data_.log"),
-            logFormatSettings);
+
+        var baseLogPath = Path.Join(
+            PathToSaveLogsIn,
+            "serial_data_.log");
+                
+        var fullLogPath = GetSessionLogPath(baseLogPath, serialSettings);
+        
+        _sessionLogFolderPath = 
+            Path.GetDirectoryName(fullLogPath) ?? "";
+
+        Directory.CreateDirectory(_sessionLogFolderPath);
+        
+        _serialPortHelpers.StartLogging(fullLogPath, logFormatSettings);
         
         StopLoggingButtonBackgroundColor = DarkRed;
         StopLoggingButtonForegroundColor = TextLight;
@@ -178,7 +189,25 @@ public partial class MainWindowViewModel : ObservableObject
         StartLoggingButtonForegroundColor = TextDark; 
         
         // TODO: Update CurrentLogFilename
-    } 
+    }
+
+    private string GetSessionLogPath(string baseLogPath, SerialPortSettings serialSettings)
+    {
+        var logFilename = Path.GetFileName(baseLogPath);
+        var logDirectory = Path.GetDirectoryName(baseLogPath);
+
+        var fileSafeTimestamp = DateTimeOffset.Now.ToString("s").Replace(":", "_");
+
+        var guidString = Guid.NewGuid().ToString();
+        var shortUid = guidString.Substring(2, 6);
+        
+        var finalLogPath = Path.Join(
+            logDirectory, 
+            $"{serialSettings.ComPortName}_SES_START_{fileSafeTimestamp}_{shortUid}",
+            logFilename);
+
+        return finalLogPath;
+    }
 
     [RelayCommand]
     private void RescanSystemComPorts()
@@ -516,12 +545,25 @@ public partial class MainWindowViewModel : ObservableObject
     /// <summary>
     /// Called from the XAML when window is loaded
     /// </summary>
-    public void OnWindowLoaded()
+    public async Task OnWindowLoaded()
     {
         InitializeNecessaryControls();
         
         LoadStoredSettingsIntoWindow();
-        
-        Task.Run(UpdateLogTextboxWithFileContents);
+
+        while (true)
+        {
+            try
+            {
+                await UpdateLogTextboxWithFileContents();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
+
+            await Task.Delay(50);
+        }
     }
 }
