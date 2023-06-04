@@ -76,6 +76,16 @@ public class SerialPortHelpers
         _serialLogger.StartLoggingBacker(fullPathToLogfile, logFormatSettings, _currentSerialPort);
     }
     
+    
+    /// <summary>
+    /// Starts a new serial log to file and passed TextBox 
+    /// </summary>
+    /// <param name="fullPathToLogfile">Full path to logfile</param>
+    public void PrepareToSendResponseImmediately(string fullPathToLogfile, LogFormatting logFormatSettings)
+    {
+        _serialLogger.SendResponseImmediatelyBacker(fullPathToLogfile, logFormatSettings, _currentSerialPort);
+    }
+    
     /// <summary>
     /// Opens com port if not already open and writes data to it
     /// </summary>

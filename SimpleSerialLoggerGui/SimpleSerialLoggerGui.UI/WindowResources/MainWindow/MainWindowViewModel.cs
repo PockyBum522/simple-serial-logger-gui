@@ -181,6 +181,7 @@ public partial class MainWindowViewModel : ObservableObject
         Directory.CreateDirectory(_sessionLogFolderPath);
         
         _serialPortHelpers.StartLogging(fullLogPath, logFormatSettings);
+        //_serialPortHelpers.PrepareToSendResponseImmediately(fullLogPath, logFormatSettings);
         
         StopLoggingButtonBackgroundColor = DarkRed;
         StopLoggingButtonForegroundColor = TextLight;
